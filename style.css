@@ -1,0 +1,232 @@
+:root {
+  --sora-color: #87CEEB;
+  --roboco-color: #FFB6C1;
+  --miko-color: #FFB7C5;
+  --suisei-color: #4169E1;
+  --azki-color: #FF6347;
+  --aki-color: #FFB6C1;
+  --fubuki-color: #87CEEB;
+  --matsuri-color: #FFA500;
+  --haato-color: #FF69B4;
+  --aqua-color: #ADD8E6;
+  --shion-color: #9370DB;
+  --ayame-color: #FF1493;
+  --choco-color: #DDA0DD;
+  --subaru-color: #FFFF00;
+  --mio-color: #228B22;
+  --okayu-color: #9370DB;
+  --korone-color: #FFD700;
+  --pekora-color: #87CEEB;
+  --flare-color: #FF4500;
+  --noel-color: #F5F5F5;
+  --marine-color: #DC143C;
+  --coco-color: #FE8B04;
+  --kanata-color: #87CEEB;
+  --watame-color: #FFFF99;
+  --towa-color: #663399;
+  --luna-color: #FFB6C1;
+  --lamy-color: #E0FFFF;
+  --nene-color: #FF8C00;
+  --botan-color: #F5F5DC;
+  --polka-color: #FF69B4;
+  --laplus-color: #483D8B;
+  --lui-color: #CD5C5C;
+  --koyori-color: #FFB6C1;
+  --chloe-color: #2F4F4F;
+  --iroha-color: #98FB98;
+  --risu-color: #DEB887;
+  --moona-color: #9370DB;
+  --iofi-color: #FFB6C1;
+  --ollie-color: #FF6347;
+  --anya-color: #DDA0DD;
+  --reine-color: #4169E1;
+  --zeta-color: #2F4F4F;
+  --kaela-color: #4682B4;
+  --kobo-color: #00BFFF;
+  --calli-color: #FF69B4;
+  --kiara-color: #FF8C00;
+  --ina-color: #9370DB;
+  --gura-color: #00BFFF;
+  --amelia-color: #FFD700;
+  --irys-color: #FF1493;
+  --kronii-color: #4682B4;
+  --mumei-color: #DEB887;
+  --fauna-color: #228B22;
+  --bae-color: #FF6347;
+  --sana-color: #9370DB;
+  --shiori-color: #373741;
+  --bijou-color: #87CEEB;
+  --nerissa-color: #9370DB;
+  --fuwawa-color: #2D87F7;
+  --mococo-color: #FF82C9;
+  --elizabeth-color: #DC143C;
+  --gigi-color: #FFD700;
+  --cecilia-color: #98FB98;
+  --raora-color: #FF8C00;
+  --ao-color: #4169E1;
+  --kanade-color: #FFD700;
+  --ririka-color: #F47DA9;
+  --raden-color: #9370DB;
+  --hajime-color: #87CEEB;
+  --riona-color: #FF69B4;
+  --niko-color: #FF8C00;
+  --su-color: #4169E1;
+  --chihaya-color: #9370DB;
+  --vivi-color: #FFB6C1;
+}
+*,*::before,*::after {
+  box-sizing: border-box;
+}
+body {
+  font-family: sans-serif;
+  margin: 1rem;
+  padding: 0;
+  background: #f7f7fa;
+  color: #333;
+  font-size: 16px;
+}
+
+#calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.weekday-labels {
+  display: none;
+}
+
+.day-cell {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  min-height: 6em;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.875rem;
+  border: 1px solid #ddd;
+}
+
+.day-cell .weekday {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 0.25rem;
+}
+
+.day-cell.today {
+  outline: 2px solid #f39;
+  outline-offset: -2px;
+}
+
+.day-cell.highlight {
+  background-color: #ffe6f0;
+}
+
+.event {
+  margin: 0.1rem 0;
+  padding: 0.1rem 0.25rem;
+  border-radius: 0.25rem;
+  color: #323232;
+  font-size: 0.8rem;
+  &.birthday::before { content: "🎂 "; }
+  &.debut::before { content: "📢 "; }
+  &.graduation::before { content: "🎓 "; }
+}
+
+.event.special{
+  --padding: 0.25rem;
+  &::before { content: "✨ "; }
+  &:has(details)::before {
+    content: none;
+  }
+  &:has(details) details::before {
+    content: "✨ ";
+    position: absolute;
+    top: var(--padding);
+    left: var(--padding);
+  }
+  details {
+    background: #f0f8ff;
+    border: 1px solid #ccc;
+    border-radius: var(--padding);
+    padding: var(--padding);
+    position: relative;
+    .event-member{
+      padding:calc(var(--padding) / 2) var(--padding);
+      &+& {
+        margin-top: var(--padding);
+      }
+      border-radius: var(--padding);
+    }
+  }
+}
+summary {
+  padding-left: 20px;
+  cursor: pointer;
+}
+
+.event.hidden {
+  display: none !important;
+}
+
+#eventList {
+  margin-top: 2rem;
+}
+
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  margin: 0.5rem 0;
+  box-sizing: border-box;
+}
+
+#filter label {
+  margin-right: 1rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 991px) {
+  #calendar-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 767px) {
+  #calendar-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  #calendar-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .event {
+    font-size: 0.75rem;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #filter label {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+  }
+}
+@media (max-width: 479px) {
+  #calendar-grid {
+    grid-template-columns: 1fr;
+  }
+}
