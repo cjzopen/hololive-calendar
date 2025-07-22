@@ -1,38 +1,38 @@
 :root {
-  --sora-color: #87CEEB;
-  --roboco-color: #FFB6C1;
-  --miko-color: #FFB7C5;
+  --sora-color: #4a9be7;
+  --roboco-color: #e76161;
+  --miko-color: #f7a9bd;
   --suisei-color: #4169E1;
-  --azki-color: #FF6347;
-  --aki-color: #FFB6C1;
-  --fubuki-color: #87CEEB;
+  --azki-color: #e999ab;
+  --aki-color: #f5768b;
+  --fubuki-color: #ace5ed;
   --matsuri-color: #FFA500;
   --haato-color: #FF69B4;
-  --aqua-color: #ADD8E6;
+  --aqua-color: #f4bee0;
   --shion-color: #9370DB;
-  --ayame-color: #FF1493;
+  --ayame-color: #df315a;
   --choco-color: #DDA0DD;
-  --subaru-color: #FFFF00;
+  --subaru-color: #f0d881;
   --mio-color: #228B22;
   --okayu-color: #9370DB;
   --korone-color: #FFD700;
-  --pekora-color: #87CEEB;
+  --pekora-color: #84ccf7;
   --flare-color: #FF4500;
   --noel-color: #F5F5F5;
   --marine-color: #DC143C;
   --coco-color: #FE8B04;
-  --kanata-color: #87CEEB;
-  --watame-color: #FFFF99;
-  --towa-color: #663399;
-  --luna-color: #FFB6C1;
+  --kanata-color: #66ade4;
+  --watame-color: #fef09d;
+  --towa-color: #b395e0;
+  --luna-color: #fe95ed;
   --lamy-color: #E0FFFF;
-  --nene-color: #FF8C00;
+  --nene-color: #feb55d;
   --botan-color: #F5F5DC;
-  --polka-color: #FF69B4;
+  --polka-color: #fe0f80;
   --laplus-color: #483D8B;
   --lui-color: #CD5C5C;
   --koyori-color: #FFB6C1;
-  --chloe-color: #2F4F4F;
+  --chloe-color: #426464;
   --iroha-color: #98FB98;
   --risu-color: #DEB887;
   --moona-color: #9370DB;
@@ -40,13 +40,13 @@
   --ollie-color: #FF6347;
   --anya-color: #DDA0DD;
   --reine-color: #4169E1;
-  --zeta-color: #2F4F4F;
-  --kaela-color: #4682B4;
+  --zeta-color: #517a7a;
+  --kaela-color: #d83f3f;
   --kobo-color: #00BFFF;
   --calli-color: #FF69B4;
-  --kiara-color: #FF8C00;
+  --kiara-color: #fe511d;
   --ina-color: #9370DB;
-  --gura-color: #00BFFF;
+  --gura-color: #5d80c6;
   --amelia-color: #FFD700;
   --irys-color: #FF1493;
   --kronii-color: #4682B4;
@@ -54,8 +54,8 @@
   --fauna-color: #228B22;
   --bae-color: #FF6347;
   --sana-color: #9370DB;
-  --shiori-color: #373741;
-  --bijou-color: #87CEEB;
+  --shiori-color: #575768;
+  --bijou-color: #6e5bf4;
   --nerissa-color: #9370DB;
   --fuwawa-color: #2D87F7;
   --mococo-color: #FF82C9;
@@ -67,12 +67,14 @@
   --kanade-color: #FFD700;
   --ririka-color: #F47DA9;
   --raden-color: #9370DB;
-  --hajime-color: #87CEEB;
+  --hajime-color: #B6B9FF;
   --riona-color: #FF69B4;
   --niko-color: #FF8C00;
   --su-color: #4169E1;
   --chihaya-color: #9370DB;
   --vivi-color: #FFB6C1;
+
+  --box-color: #d8dce1
 }
 *,*::before,*::after {
   box-sizing: border-box;
@@ -81,11 +83,28 @@ body {
   font-family: sans-serif;
   margin: 1rem;
   padding: 0;
-  background: #f7f7fa;
+  background-color: #8392b4;
   color: #333;
   font-size: 16px;
 }
-
+button {
+  -webkit-apperance: none;
+  appearance: none;
+  padding: 0.5rem;
+  border: none;
+  background-color: transparent;
+  color: #0b4152;
+  cursor: pointer;
+}
+h1{
+  text-align: center;
+}
+#month-label {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #1f363a;
+  margin: 0 1rem;
+}
 #calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -98,14 +117,14 @@ body {
 }
 
 .day-cell {
-  background: white;
+  background-color: var(--box-color);
   border-radius: 0.5rem;
   padding: 0.5rem;
   min-height: 6em;
   display: flex;
   flex-direction: column;
   font-size: 0.875rem;
-  border: 1px solid #ddd;
+  border: 1px solid #323349;
 }
 
 .day-cell .weekday {
@@ -184,7 +203,7 @@ summary {
 }
 
 input[type="text"] {
-  width: 100%;
+  width: min(400px, 100%);
   padding: 0.5rem;
   font-size: 1rem;
   margin: 0.5rem 0;

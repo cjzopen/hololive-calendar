@@ -4,32 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="max-image-preview:large">
-  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="/images/favicon.png" type="image/png" sizes="192x192">
+  <!-- <link rel="icon" href="/images/favicon.svg" type="image/svg+xml"> -->
+  <link rel="icon" href="images/favicon.png" type="image/png" sizes="192x192">
 
-  <title>hololive月曆</title>
-  <meta name="description" content="holive成員的生日、出道日、特殊日曆事件等資訊。">
+  <title>hololive曆（非公式）</title>
+  <meta name="description" content="holive成員的誕生日、出道日、特殊事件等資訊。">
   <link rel="canonical" href="https://https://cjzopen.github.io/hololive-calendar/">
 
-  <meta property="og:title" content="hololive月曆">
-  <meta property="og:description" content="holive成員的生日、出道日、特殊日曆事件等資訊。">">
+  <meta property="og:title" content="hololive曆（非公式）">
+  <meta property="og:description" content="holive成員的誕生日、出道日、特殊事件等資訊。">
   <meta property="og:image" content="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiS3pLOJKGDo1AAPr8URC2mRj5pWX9kkC6lWqUM9TvrYpwULROqTkWh2sISXKDDrOL_ap27kUlv0jHbE1HZd9EJMQP9n5aVw-JDZd6GTD9aGVJhIpV5przuihb5aOHcIV6AL91wZeQ_AJO4tZlXejXNKOo19-ThfuL1iLtIQ39YNAsjH9fE1iXe-E5hCw/s960/%E6%97%A5%E5%B8%B8.webp">
-  <meta property="og:url" content="https://https://cjzopen.github.io/hololive-calendar/">">
+  <meta property="og:url" content="https://https://cjzopen.github.io/hololive-calendar/">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="zh_TW">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@cjzopen">
-  <meta name="twitter:title" content="hololive月曆">
-  <meta name="twitter:description" content="holive成員的生日、出道日、特殊日曆事件等資訊。">">
+  <meta name="twitter:title" content="hololive曆（非公式）">
+  <meta name="twitter:description" content="holive成員的誕生日、出道日、特殊事件等資訊。">
   <meta name="twitter:image" content="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiS3pLOJKGDo1AAPr8URC2mRj5pWX9kkC6lWqUM9TvrYpwULROqTkWh2sISXKDDrOL_ap27kUlv0jHbE1HZd9EJMQP9n5aVw-JDZd6GTD9aGVJhIpV5przuihb5aOHcIV6AL91wZeQ_AJO4tZlXejXNKOo19-ThfuL1iLtIQ39YNAsjH9fE1iXe-E5hCw/s960/%E6%97%A5%E5%B8%B8.webp">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="calendar-app">
+    <h1>ホロこよみ</h1>
     <header id="header">
-      <button id="prev-month">←</button>
-      <h1 id="month-label"></h1>
-      <button id="next-month">→</button>
+      <button id="prev-month" type="button">
+        <svg width="44" fill="currentColor" viewBox="0 0 448 512"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
+      </button>
+      <div id="month-label"></div>
+      <button id="next-month" type="button">
+        <svg width="44" fill="currentColor" viewBox="0 0 448 512"><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></svg>
+      </button>
     </header>
 
     <!-- <div class="weekday-labels">
@@ -37,8 +42,8 @@
     </div> -->
 
     <div id="filter">
-      <label><input type="checkbox" class="filter-checkbox" value="birthday" checked> 🎂 生日</label>
-      <label><input type="checkbox" class="filter-checkbox" value="debut" checked> 🎤 出道</label>
+      <label><input type="checkbox" class="filter-checkbox" value="birthday" checked> 🎂 誕生日</label>
+      <label><input type="checkbox" class="filter-checkbox" value="debut" checked> 🎤 デビュー</label>
       <label><input type="checkbox" class="filter-checkbox" value="special" checked> ✨ 特殊</label>
     </div>
 
