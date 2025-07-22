@@ -6,8 +6,10 @@ const searchInput = document.getElementById("search-input");
 const filterCheckboxes = document.querySelectorAll(".filter-checkbox");
 
 let current = new Date();
-let fixedEvents = [];
+let fixedEvents = {};
 let specialEvents = {};
+
+
 
 fetch("fixed-events.json")
   .then(res => res.json())
@@ -17,7 +19,21 @@ fetch("fixed-events.json")
   })
   .then(res => res.json())
   .then(data => {
-    specialEvents = data;
+    // special-events dates to key object
+    specialEvents = {};
+    for (const [eventTitle, arr] of Object.entries(data)) {
+      for (const ev of arr) {
+        if (Array.isArray(ev.date)) {
+          ev.date.forEach(dateStr => {
+            if (!specialEvents[dateStr]) specialEvents[dateStr] = [];
+            specialEvents[dateStr].push({ ...ev, event: eventTitle, date: dateStr });
+          });
+        } else {
+          if (!specialEvents[ev.date]) specialEvents[ev.date] = [];
+          specialEvents[ev.date].push({ ...ev, event: eventTitle });
+        }
+      }
+    }
     render();
   });
 
@@ -76,8 +92,71 @@ function render() {
     dayContent.innerHTML = `${d} <span class="weekday">（${weekdayNames[date.getDay()]}）</span>`;
     cell.appendChild(dayContent);
 
-    const matches = [...fixedEvents.filter(e => e.month === month + 1 && e.day === d),
-      ...(specialEvents[`${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`] || [])];
+    let matches = [];
+    // fixed events
+    for (const [ch, info] of Object.entries(fixedEvents)) {
+      // birthday
+      if (info.birthday) {
+        let [bm, bd] = info.birthday.split("-").map(Number);
+        if (bm === month + 1 && bd === d) {
+          matches.push({
+            type: "birthday",
+            character: ch,
+            emoji: info.emoji,
+            name: info.name
+          });
+        }
+        // 2/29 處理
+        if (bm === 2 && bd === 29 && month + 1 === 2 && d === 28) {
+          const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+          if (!isLeap) {
+            matches.push({
+              type: "birthday",
+              character: ch,
+              emoji: info.emoji,
+              name: info.name
+            });
+          }
+        }
+      }
+      // debut
+      if (info.debut) {
+        let [dm, dd] = info.debut.split("-").map(Number);
+        if (dm === month + 1 && dd === d) {
+          matches.push({
+            type: "debut",
+            character: ch,
+            emoji: info.emoji,
+            name: info.name
+          });
+        }
+      }
+      // 可擴充更多事件類型
+    }
+    // special events
+    const specials = (specialEvents[`${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`] || []).map(ev => {
+      // emoji/name 一律從 fixed-events 查找
+      if (!ev.character || (Array.isArray(ev.character) && ev.character.length === 0)) {
+        return { ...ev, name: Array.isArray(ev.character) ? [] : "", emoji: Array.isArray(ev.character) ? [] : "" };
+      }
+      if (Array.isArray(ev.character)) {
+        return {
+          ...ev,
+          name: ev.character.map(ch => (fixedEvents[ch]?.name ?? "")),
+          emoji: ev.character.map(ch => (fixedEvents[ch]?.emoji ?? ""))
+        };
+      } else {
+        return {
+          ...ev,
+          name: fixedEvents[ev.character]?.name ?? "",
+          emoji: fixedEvents[ev.character]?.emoji ?? ""
+        };
+      }
+    });
+    matches = [
+      ...matches,
+      ...specials
+    ];
 
     let highlight = false;
 

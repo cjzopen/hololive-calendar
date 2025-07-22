@@ -1,44 +1,71 @@
 {
-  "2025-02-12": [
-    { "type": "special", "character": "fubuki", "emoji": "🌽", "name": "白上フブキ", "event": " 1st Solo Live「FBKINGDOM “ANTHEM”」" }
-  ]
-  ,"2025-07-05": [
-    { 
-      "type": "special",
-      "character": ["fubuki", "mio", "okayu", "korone"],
-      "emoji": ["🌽", "🌲", "🍙", "🥐"],
-      "name": ["白上フブキ", "大神ミオ", "猫又おかゆ", "戌神ころね"],
-      "event": "hololive GAMERS fes. 超超超超ゲーマーズ2"
-    }
-  ]
-  ,"2025-07-06": [
-    { 
-      "type": "special",
-      "character": ["fubuki", "mio", "okayu", "korone"],
-      "emoji": ["🌽", "🌲", "🍙", "🥐"],
-      "name": ["白上フブキ", "大神ミオ", "猫又おかゆ", "戌神ころね"],
-      "event": "hololive GAMERS fes. 超超超超ゲーマーズ2"
-    }
-  ]
-  ,"2025-08-13": [
-    { "type": "special", "character": "kanata", "emoji": "💫", "name": "天音かなた", "event": "1st Solo Live 「LOCK ON」" }
-  ]
-  ,"2025-08-23": [
-    { "type": "special", "character": "", "emoji": "", "name": "hololive English", "event": "hololive English 3rd Concert -All for One-" }
-  ]
-  ,"2025-08-24": [
-    { "type": "special", "character": "", "emoji": "", "name": "hololive English", "event": "hololive English 3rd Concert -All for One-" }
-  ]
-  ,"2025-09-06": [
+  "hololive Meet @ TAIPEI": [
     {
       "type": "special",
-      "character": ["sora", "roboco", "miko", "suisei", "azki"],
-      "emoji": ["🐻", "\uD83E\uDD16", "🌸", "☄️", "⚒️"],
-      "name": ["ときのそら", "ロボ子さん", "さくらみこ", "星街すいせい", "AZKi"],
-      "event": "Shiny Sparklers Symphony 煙火×無人機音樂會"
+      "character": [
+        "towa",
+        "laplus"
+      ],
+      "date": "2025-01-18"
     }
-  ]
-  ,"2025-09-10": [
-    { "type": "special", "character": "mio", "emoji": "🌲", "name": "大神ミオ", "event": "1st Live. 『Our Sparkle』" }
+  ],
+  "1st Solo Live「FBKINGDOM “ANTHEM”」": [
+    {
+      "type": "special",
+      "character": "fubuki",
+      "date": "2025-02-12"
+    }
+  ],
+  "hololive GAMERS fes. 超超超超ゲーマーズ2": [
+    {
+      "type": "special",
+      "character": [
+        "fubuki",
+        "mio",
+        "okayu",
+        "korone"
+      ],
+      "date": [
+        "2025-07-05",
+        "2025-07-06"
+      ]
+    }
+  ],
+  "1st Solo Live「LOCK ON」": [
+    {
+      "type": "special",
+      "character": "kanata",
+      "date": "2025-08-13"
+    }
+  ],
+  "hololive English 3rd Concert -All for One-": [
+    {
+      "type": "special",
+      "character": "",
+      "date": [
+        "2025-08-23",
+        "2025-08-24"
+      ]
+    }
+  ],
+  "Shiny Sparklers Symphony 花火×無人機音樂會": [
+    {
+      "type": "special",
+      "character": [
+        "sora",
+        "roboco",
+        "miko",
+        "suisei",
+        "azki"
+      ],
+      "date": "2025-09-06"
+    }
+  ],
+  "1st Solo Live『Our Sparkle』": [
+    {
+      "type": "special",
+      "character": "mio",
+      "date": "2025-09-10"
+    }
   ]
 }
