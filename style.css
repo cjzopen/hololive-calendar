@@ -81,12 +81,17 @@
 }
 body {
   font-family: sans-serif;
-  margin: 1rem;
+  margin: 0;
   padding: 0;
   background-color: #42b9ef;
   background-image: linear-gradient(135deg,rgba(97, 223, 235) 0%, rgba(179, 238, 249, .8) 66%, #2c7cff 100%);
   color: #333;
   font-size: 16px;
+}
+#calendar-app {
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: 1rem;
   min-height: 100dvh;
 }
 button {
