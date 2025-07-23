@@ -251,3 +251,9 @@ input[type="text"] {
     grid-template-columns: 1fr;
   }
 }
+#copyright {
+  text-align: center;
+  padding: 1rem;
+  background-color: #323232;
+  color: var(--box-color);
+}
