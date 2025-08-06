@@ -67,5 +67,15 @@
       "character": "mio",
       "date": "2025-09-10"
     }
+  ],
+  "8th Anniversary Party「Starry Bl∞min’」": [
+    {
+      "type": "special",
+      "character": "sora",
+      "date": [
+        "2025-10-01",
+        "2025-10-02"
+      ]
+    }
   ]
 }
