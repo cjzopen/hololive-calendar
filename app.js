@@ -1,20 +1,27 @@
+
 const calendarGrid = document.getElementById("calendar-grid");
 const monthLabel = document.getElementById("month-label");
 const prevMonthBtn = document.getElementById("prev-month");
 const nextMonthBtn = document.getElementById("next-month");
 const searchInput = document.getElementById("search-input");
+const searchDatalist = document.getElementById("search-datalist");
 const filterCheckboxes = document.querySelectorAll(".filter-checkbox");
+
 
 let current = new Date();
 let fixedEvents = {};
 let specialEvents = {};
 
 
-
 fetch("fixed-events.json")
   .then(res => res.json())
   .then(data => {
     fixedEvents = data;
+    // 動態產生 datalist options
+    if (searchDatalist) {
+      const names = Object.values(data).map(info => info.name).filter(Boolean);
+      searchDatalist.innerHTML = names.map(name => `<option value="${name}">`).join("");
+    }
     return fetch("special-events.json");
   })
   .then(res => res.json())
