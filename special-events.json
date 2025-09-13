@@ -90,6 +90,13 @@
       ]
     }
   ],
+  "Towa 2nd Live “SHINier”": [
+    {
+      "type": "special",
+      "character": "towa",
+      "date": "2025-10-29"
+    }
+  ],
   "hololive Indonesia 5th Anniversary LIVE Chromatic Future": [
     {
       "type": "special",
@@ -102,6 +109,13 @@
       "type": "special",
       "character": "azki",
       "date": "2025-11-19"
+    }
+  ],
+  "ReGLOSS 1st Live “Flashpoint”": [
+    {
+      "type": "special",
+      "character": "",
+      "date": "2025-12-16"
     }
   ]
 }
