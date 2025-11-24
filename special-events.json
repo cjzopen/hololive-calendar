@@ -146,5 +146,18 @@
       "character": "suisei",
       "date": "2026-02-21"
     }
-  ]
+  ],
+  "\"Drawn to Dawn\"": [
+    {
+      "type": "special",
+      "character": [
+        "kiara",
+        "ina"
+      ],
+      "date": [
+        "2026-03-26",
+        "2026-03-27"
+      ]
+    }
+  ],
 }
