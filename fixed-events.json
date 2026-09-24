@@ -209,6 +209,12 @@
     "birthday": "03-15",
     "debut": "11-28"
   },
+  "ai-koyori": {
+    "name": "AIこより",
+    "emoji": "",
+    "birthday": "09-25",
+    "debut": "09-25"
+  },
   "chloe": {
     "name": "沙花叉クロヱ",
     "emoji": "🎣",
@@ -454,5 +460,29 @@
     "emoji": "✨",
     "birthday": "08-27",
     "debut": "11-09"
+  },
+  "mera": {
+    "name": "熱千めら",
+    "emoji": "🧯",
+    "birthday": "04-16",
+    "debut": "09-24"
+  },
+  "sopia": {
+    "name": "宙科そぴあ",
+    "emoji": "📡",
+    "birthday": "06-13",
+    "debut": "09-24"
+  },
+  "kyoko": {
+    "name": "百灯キョーコ",
+    "emoji": "👮📢",
+    "birthday": "",
+    "debut": "09-25"
+  },
+  "tsuzuri": {
+    "name": "鈴鳴つづり",
+    "emoji": "🐐💌",
+    "birthday": "",
+    "debut": "09-25"
   }
 }
