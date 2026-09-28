@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="max-image-preview:large">
-  <!-- <link rel="icon" href="/images/favicon.svg" type="image/svg+xml"> -->
   <link rel="icon" href="images/favicon.png" type="image/png" sizes="192x192">
 
   <title>hololive曆（非公式）</title>
@@ -22,51 +21,203 @@
   <meta name="twitter:title" content="hololive曆（非公式）">
   <meta name="twitter:description" content="holive成員的誕生日、出道日、特殊事件等資訊。">
   <meta name="twitter:image" content="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiS3pLOJKGDo1AAPr8URC2mRj5pWX9kkC6lWqUM9TvrYpwULROqTkWh2sISXKDDrOL_ap27kUlv0jHbE1HZd9EJMQP9n5aVw-JDZd6GTD9aGVJhIpV5przuihb5aOHcIV6AL91wZeQ_AJO4tZlXejXNKOo19-ThfuL1iLtIQ39YNAsjH9fE1iXe-E5hCw/s960/%E6%97%A5%E5%B8%B8.webp">
+
+  <!-- Google Fonts: Dela Gothic One, Fredoka, Zen Maru Gothic, Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Fredoka:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css" />
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-HYXNTEXRJ5"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-HYXNTEXRJ5');
-</script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYXNTEXRJ5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-HYXNTEXRJ5');
+  </script>
 </head>
 <body>
-  <div id="calendar-app">
-    <h1>ホロこよみ</h1>
-    <header id="header">
-      <button id="prev-month" type="button">
-        <svg width="44" fill="currentColor" viewBox="0 0 448 512"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
-      </button>
-      <div id="month-label"></div>
-      <button id="next-month" type="button">
-        <svg width="44" fill="currentColor" viewBox="0 0 448 512"><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></svg>
-      </button>
-    </header>
+  <div id="app-layout">
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-    <!-- <div class="weekday-labels">
-      <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
-    </div> -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">✨</div>
+        <div class="brand-text">
+          <h1 class="brand-title">ホロこよみ</h1>
+          <div class="brand-subtitle">hololive calendar</div>
+        </div>
+        <span class="brand-badge">非公式</span>
+      </div>
 
-    <div id="filter">
-      <label><input type="checkbox" class="filter-checkbox" value="birthday" checked> 🎂 誕生日</label>
-      <label><input type="checkbox" class="filter-checkbox" value="debut" checked> 📢 デビュー</label>
-      <label><input type="checkbox" class="filter-checkbox" value="special" checked> ✨ 特殊</label>
+      <nav class="sidebar-nav">
+        <button type="button" class="nav-item active" data-view="home">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">首頁</span>
+        </button>
+        <button type="button" class="nav-item" data-view="calendar">
+          <span class="nav-icon">📅</span>
+          <span class="nav-label">完整月曆</span>
+        </button>
+        <button type="button" class="nav-item" data-view="members">
+          <span class="nav-icon">👥</span>
+          <span class="nav-label">成員名冊</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-deco-circle"></div>
+        <small class="sidebar-copyright">&copy; cjzopen</small>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <header id="mobile-topbar" class="mobile-topbar">
+        <button type="button" id="menu-toggle" class="menu-toggle" aria-label="切換選單">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <div class="topbar-title">ホロこよみ</div>
+        <button type="button" id="quick-today-btn" class="quick-today-btn">今日 ✨</button>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <!-- 視圖 1: 首頁 (Today & Upcoming) -->
+        <section id="view-home" class="page-view active">
+          <div class="hero-banner">
+            <div class="hero-content">
+              <div class="hero-tag">🌸 TODAY'S HIGHLIGHT</div>
+              <h2 class="hero-title">今日手帳與近期日程</h2>
+              <p class="hero-desc">掌握 hololive 成員的每一刻生日、出道與演唱會精彩紀念！</p>
+            </div>
+            <div class="hero-date-box" id="hero-date-box"></div>
+          </div>
+
+          <!-- 今日焦點區塊 -->
+          <div class="section-block">
+            <div class="section-header">
+              <h3 class="section-title"><span class="title-icon">🎉</span> 今日有什麼？</h3>
+              <span class="section-sub" id="today-summary-label">正在載入今日事件...</span>
+            </div>
+            <div id="today-events-container" class="today-events-container"></div>
+          </div>
+
+          <!-- 近期活動與倒數區塊 -->
+          <div class="section-block">
+            <div class="section-header">
+              <h3 class="section-title"><span class="title-icon">⏳</span> 最近有什麼？</h3>
+              <span class="section-sub">即將到來的紀念日與活動倒數</span>
+            </div>
+            <div class="upcoming-filter-bar">
+              <button type="button" class="filter-chip active" data-filter="all">全部</button>
+              <button type="button" class="filter-chip" data-filter="birthday">🎂 誕生日</button>
+              <button type="button" class="filter-chip" data-filter="debut">📢 デビュー</button>
+              <button type="button" class="filter-chip" data-filter="special">✨ 特殊活動</button>
+            </div>
+            <div id="upcoming-events-container" class="upcoming-events-container"></div>
+          </div>
+        </section>
+
+        <!-- 視圖 2: 完整月曆 (Full Calendar) -->
+        <section id="view-calendar" class="page-view">
+          <div class="calendar-top-bar">
+            <div class="calendar-nav-controls">
+              <button id="prev-month" type="button" class="nav-arrow-btn" aria-label="上個月">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 448 512"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg>
+              </button>
+              <div id="month-label" class="calendar-month-label"></div>
+              <button id="next-month" type="button" class="nav-arrow-btn" aria-label="下個月">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 448 512"><path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/></svg>
+              </button>
+              <button id="today-btn" type="button" class="btn-today">TODAY 🏠</button>
+            </div>
+
+            <div class="calendar-toolbar">
+              <div id="filter" class="filter-pills">
+                <label class="filter-pill">
+                  <input type="checkbox" class="filter-checkbox" value="birthday" checked>
+                  <span class="pill-label">🎂 誕生日</span>
+                </label>
+                <label class="filter-pill">
+                  <input type="checkbox" class="filter-checkbox" value="debut" checked>
+                  <span class="pill-label">📢 デビュー</span>
+                </label>
+                <label class="filter-pill">
+                  <input type="checkbox" class="filter-checkbox" value="special" checked>
+                  <span class="pill-label">✨ 特殊</span>
+                </label>
+              </div>
+
+              <div class="search-box">
+                <input type="text" id="search-input" placeholder="🔍 搜尋成員…" list="search-datalist" />
+                <datalist id="search-datalist"></datalist>
+              </div>
+            </div>
+          </div>
+
+          <!-- 雙欄手帳佈局 (Master-Detail) -->
+          <div class="calendar-layout-container">
+            <div class="calendar-main-column">
+              <div class="weekday-labels-grid">
+                <div class="weekday-header is-sun">SUN</div>
+                <div class="weekday-header">MON</div>
+                <div class="weekday-header">TUE</div>
+                <div class="weekday-header">WED</div>
+                <div class="weekday-header">THU</div>
+                <div class="weekday-header">FRI</div>
+                <div class="weekday-header is-sat">SAT</div>
+              </div>
+              <div id="calendar-grid" class="calendar-cards-grid"></div>
+            </div>
+
+            <!-- 右側/下方 當日詳細面板 (Day Journal Detail) -->
+            <aside class="calendar-detail-panel" id="calendar-day-panel">
+              <div class="detail-panel-card">
+                <div class="detail-header">
+                  <span class="detail-badge">SELECTED DAY</span>
+                  <h3 id="panel-date-title" class="panel-date-title">2026年9月28日</h3>
+                </div>
+                <div id="panel-events-list" class="panel-events-list"></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- 視圖 3: 成員專屬頁 (Members) -->
+        <section id="view-members" class="page-view">
+          <div id="members-list-subview">
+            <div class="section-header">
+              <h3 class="section-title"><span class="title-icon">👥</span> 成員名冊</h3>
+              <span class="section-sub">點選成員檢視專屬紀念日與歷來活動</span>
+            </div>
+            <div class="members-search-bar">
+              <input type="text" id="members-search-input" placeholder="🔍 搜尋成員姓名、推符或代號…" />
+            </div>
+            <div id="members-grid" class="members-grid"></div>
+          </div>
+
+          <div id="member-profile-subview" class="member-profile-subview hidden">
+            <button type="button" id="member-back-btn" class="member-back-btn">
+              ◀ 返回成員名冊
+            </button>
+            <div id="member-spotlight-card" class="member-spotlight-card"></div>
+            <div class="member-timeline-block">
+              <h4 class="member-timeline-title">🎪 活動與企劃日程</h4>
+              <div id="member-events-timeline" class="member-events-timeline"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer id="footer" class="site-footer">
+        <div class="footer-inner">
+          <div class="footer-brand">ホロこよみ · hololive calendar（非公式）</div>
+          <small>&copy; cjzopen</small>
+        </div>
+      </footer>
     </div>
-
-    <div>
-      <input type="text" id="search-input" placeholder="🔍 ホロメン…" list="search-datalist" />
-      <datalist id="search-datalist"></datalist>
-    </div>
-
-    <div id="calendar-grid"></div>
-    <div id="event-list"></div>
   </div>
 
-  <footer id="footer">
-    <div id="copyright"><small>&copy; cjzopen</small></div>
-  </footer>
   <script src="app.js" defer></script>
 </body>
 </html>
