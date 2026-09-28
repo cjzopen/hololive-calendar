@@ -67,7 +67,7 @@ Promise.all([
   populateSearchDatalist();
   setupEventListeners();
   renderApp();
-  handleHashNavigation();
+  restoreSavedState();
 }).catch(err => {
   console.error("データ読み込み失敗:", err);
 });
@@ -197,6 +197,7 @@ function setupEventListeners() {
     memberBackBtn.onclick = () => {
       executeTransition(() => {
         activeMemberFilter = null;
+        localStorage.setItem("holokoyomi_active_member", "");
         updateSidebarMemberStatus();
         memberProfileSubview.classList.add("u-hidden");
         membersListSubview.classList.remove("u-hidden");
@@ -220,9 +221,7 @@ function closeMobileSidebar() {
 function switchView(viewName) {
   if (activeView === viewName && viewName !== "members") return;
 
-  if (!window.location.hash.startsWith("#member:")) {
-    try { history.replaceState(null, "", "#" + viewName); } catch (e) {}
-  }
+  localStorage.setItem("holokoyomi_active_view", viewName);
 
   executeTransition(() => {
     activeView = viewName;
@@ -251,24 +250,30 @@ function switchView(viewName) {
   });
 }
 
-function handleHashNavigation() {
-  const hash = window.location.hash.replace(/^#/, "");
-  if (!hash) return;
+function restoreSavedState() {
+  if (window.location.hash) {
+    try {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    } catch (e) {}
+  }
 
-  if (hash === "home" || hash === "calendar" || hash === "members") {
-    switchView(hash);
-  } else if (hash.startsWith("member:")) {
-    const slug = hash.replace("member:", "");
-    if (fixedEvents && fixedEvents[slug]) {
-      openMemberSpotlight(slug);
-    }
+  const savedView = localStorage.getItem("holokoyomi_active_view") || "home";
+  const savedMember = localStorage.getItem("holokoyomi_active_member");
+
+  if (savedView === "members" && savedMember && fixedEvents[savedMember]) {
+    openMemberSpotlight(savedMember);
+  } else if (savedMember && fixedEvents[savedMember] && savedView === "calendar") {
+    activeMemberFilter = savedMember;
+    updateSidebarMemberStatus();
+    switchView("calendar");
+  } else {
+    switchView(savedView);
   }
 }
 
-window.addEventListener("hashchange", handleHashNavigation);
-
 function clearMemberFocus() {
   activeMemberFilter = null;
+  localStorage.setItem("holokoyomi_active_member", "");
   updateSidebarMemberStatus();
   if (calendarMemberFilterBanner) {
     calendarMemberFilterBanner.classList.add("u-hidden");
@@ -899,16 +904,27 @@ function renderMembersList() {
     );
   });
 
+  const favorites = getFavorites();
+
   membersGrid.innerHTML = filtered.map(member => {
     const colorVar = getMemberColorVar(member.slug);
+    const isFav = favorites.includes(member.slug);
+    const emojiStr = member.emoji || "✨";
+
     return `
       <div class="member-card" style="--card-color: ${colorVar};" onclick="openMemberSpotlight('${member.slug}')">
         <div class="member-color-indicator"></div>
-        <div class="member-avatar-circle">${member.emoji || "✨"}</div>
+        <div class="member-oshi-box" title="${member.name}の推しマーク">${emojiStr}</div>
         <div class="member-card-info">
           <div class="member-card-name">${member.name}</div>
           <div class="member-card-slug">${member.slug}</div>
         </div>
+        <button type="button" 
+                class="member-card-heart-btn ${isFav ? 'is-active' : ''}" 
+                onclick="burstMemberOshiMark(event, '${member.slug}', '${escapeHtml(emojiStr)}')" 
+                title="${member.name}を推す！">
+          ♥
+        </button>
       </div>
     `;
   }).join("");
@@ -920,11 +936,9 @@ function openMemberSpotlight(slug) {
   if (!member) return;
 
   activeMemberFilter = slug;
+  localStorage.setItem("holokoyomi_active_view", "members");
+  localStorage.setItem("holokoyomi_active_member", slug);
   updateSidebarMemberStatus();
-
-  try {
-    history.replaceState(null, "", "#member:" + slug);
-  } catch (e) {}
 
   executeTransition(() => {
     // 切換至成員檢視
@@ -1081,6 +1095,97 @@ function showToast(msg) {
   }, 2200);
 }
 
+// Favorites in localStorage
+function getFavorites() {
+  try {
+    return JSON.parse(localStorage.getItem("holokoyomi_favorites")) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function isFavorite(slug) {
+  return getFavorites().includes(slug);
+}
+
+function toggleFavorite(slug) {
+  let favs = getFavorites();
+  let nowActive = false;
+  if (favs.includes(slug)) {
+    favs = favs.filter(s => s !== slug);
+    nowActive = false;
+  } else {
+    favs.push(slug);
+    nowActive = true;
+  }
+  localStorage.setItem("holokoyomi_favorites", JSON.stringify(favs));
+  return nowActive;
+}
+
+// Split emojis using Intl.Segmenter (handles up to 3 emojis and ZWJ sequences)
+function splitEmojis(emojiStr) {
+  if (!emojiStr) return ["💖"];
+  if (typeof Intl !== "undefined" && Intl.Segmenter) {
+    const segmenter = new Intl.Segmenter("ja", { granularity: "grapheme" });
+    const segments = Array.from(segmenter.segment(emojiStr)).map(s => s.segment.trim()).filter(Boolean);
+    return segments.length > 0 ? segments : ["💖"];
+  }
+  return [...emojiStr].filter(c => c.trim().length > 0);
+}
+
+// Disperse/Burst Member's Oshi Mark Emojis on Click
+function burstMemberOshiMark(event, slug, emojiStr) {
+  event.stopPropagation();
+  const btn = event.currentTarget || event.target;
+  const isNowFav = toggleFavorite(slug);
+
+  if (btn) {
+    btn.classList.toggle("is-active", isNowFav);
+    btn.style.transform = "scale(1.4) rotate(-8deg)";
+    setTimeout(() => {
+      if (btn) btn.style.transform = "";
+    }, 250);
+  }
+
+  const emojis = splitEmojis(emojiStr);
+  const rect = btn ? btn.getBoundingClientRect() : { left: event.clientX - 15, top: event.clientY - 15, width: 30, height: 30 };
+  const originX = rect.left + rect.width / 2;
+  const originY = rect.top + rect.height / 2;
+
+  const count = 22;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement("span");
+    p.className = "oshi-burst-particle";
+    p.textContent = emojis[i % emojis.length];
+
+    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
+    const distance = 70 + Math.random() * 150;
+    const tx = Math.cos(angle) * distance;
+    const ty = Math.sin(angle) * distance;
+    const rot = -180 + Math.random() * 360;
+    const scale = 0.85 + Math.random() * 0.7;
+    const delay = Math.random() * 90;
+
+    p.style.setProperty("--tx", `${tx.toFixed(1)}px`);
+    p.style.setProperty("--ty", `${ty.toFixed(1)}px`);
+    p.style.setProperty("--rot", `${rot.toFixed(0)}deg`);
+    p.style.setProperty("--scale", scale.toFixed(2));
+    p.style.left = `${originX}px`;
+    p.style.top = `${originY}px`;
+    p.style.animationDelay = `${delay.toFixed(0)}ms`;
+
+    document.body.appendChild(p);
+    setTimeout(() => {
+      if (p.parentNode) p.parentNode.removeChild(p);
+    }, 1100);
+  }
+}
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+}
+
 // Global exposure for inline onclick handlers
 window.switchView = switchView;
 window.openMemberSpotlight = openMemberSpotlight;
@@ -1090,3 +1195,4 @@ window.toggleKeep = toggleKeep;
 window.toggleHeart = toggleHeart;
 window.shareEvent = shareEvent;
 window.showToast = showToast;
+window.burstMemberOshiMark = burstMemberOshiMark;
