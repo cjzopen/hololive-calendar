@@ -52,6 +52,241 @@ let activeMemberFilter = null; // 当選されたメンバーのslug
 
 const weekdayNames = ["日", "月", "火", "水", "木", "金", "土"];
 
+// Member YouTube Handles Mapping
+const memberYouTubeHandles = {
+  sora: "TokinoSora",
+  roboco: "Robocosan",
+  miko: "SakuraMiko",
+  suisei: "HoshimachiSuisei",
+  azki: "AZKi",
+  aki: "AkiRosenthal",
+  mel: "YozoraMel",
+  fubuki: "ShirakamiFubuki",
+  kurosama: "ShirakamiFubuki",
+  matsuri: "NatsuiroMatsuri",
+  haato: "AkaiHaato",
+  aqua: "MinatoAqua",
+  shion: "MurasakiShion",
+  ayame: "NakiriAyame",
+  choco: "YuzukiChoco",
+  subaru: "OozoraSubaru",
+  mio: "OokamiMio",
+  okayu: "NekomataOkayu",
+  korone: "InugamiKorone",
+  pekora: "usadapekora",
+  flare: "ShiranuiFlare",
+  noel: "ShiroganeNoel",
+  marine: "HoushouMarine",
+  coco: "KiryuCoco",
+  kanata: "AmaneKanata",
+  watame: "TsunomakiWatame",
+  towa: "TokoyamiTowa",
+  luna: "HimemoriLuna",
+  lamy: "YukihanaLamy",
+  nene: "MomosuzuNene",
+  botan: "ShishiroBotan",
+  polka: "OmaruPolka",
+  laplus: "LaplusDarknesss",
+  lui: "TakaneLui",
+  koyori: "HakuiKoyori",
+  "ai-koyori": "HakuiKoyori",
+  chloe: "SakamataChloe",
+  iroha: "KazamaIroha",
+  risu: "AyundaRisu",
+  moona: "MoonaHoshinova",
+  iofi: "AiraniIofifteen",
+  ollie: "KureijiOllie",
+  anya: "AnyaMelfissa",
+  reine: "PavoliaReine",
+  zeta: "VestiaZeta",
+  kaela: "KaelaKovalskia",
+  kobo: "KoboKanaeru",
+  calli: "MoriCalliope",
+  kiara: "TakanashiKiara",
+  ina: "NinomaeInanis",
+  gura: "GawrGura",
+  amelia: "WatsonAmelia",
+  irys: "IRyS",
+  kronii: "OuroKronii",
+  bae: "HakosBaelz",
+  fauna: "CeresFauna",
+  mumei: "NanashiMumei",
+  sana: "TsukumoSana",
+  shiori: "ShioriNovella",
+  bijou: "KosekiBijou",
+  nerissa: "NerissaRavencroft",
+  fuwawa: "FUWAMOCOch",
+  mococo: "FUWAMOCOch",
+  elizabeth: "ERBloodflame",
+  gigi: "GigiMurin",
+  cecilia: "CeciliaImmergreen",
+  raora: "RaoraPanthera",
+  ao: "HiodoshiAo",
+  kanade: "OtonoseKanade",
+  ririka: "IchijouRirika",
+  raden: "JuufuuteiRaden",
+  hajime: "TodorokiHajime",
+  riona: "IsakiRiona",
+  niko: "KoganeiNiko",
+  su: "MizumiyaSu",
+  chihaya: "RindoChihaya",
+  vivi: "KikiraraVivi",
+  mela: "NetsuiMela",
+  sopia: "ChukeSopia",
+  kyoko: "HyakutoKyoko",
+  tsuzuri: "SuzunariTsuzuri"
+};
+
+// Avatar Cache Service with LocalStorage persistence & TTL (7 days)
+const AVATAR_CACHE_KEY = "holokoyomi_avatar_cache_v2";
+const AVATAR_CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+
+const avatarCache = {
+  data: {},
+
+  init() {
+    try {
+      const raw = localStorage.getItem(AVATAR_CACHE_KEY);
+      if (raw) {
+        this.data = JSON.parse(raw);
+      }
+    } catch (e) {
+      console.warn("Avatar cache load error:", e);
+      this.data = {};
+    }
+    this.updateStatusUi();
+  },
+
+  save() {
+    try {
+      localStorage.setItem(AVATAR_CACHE_KEY, JSON.stringify(this.data));
+    } catch (e) {
+      console.warn("Avatar cache save error:", e);
+    }
+  },
+
+  get(slug) {
+    if (!slug) return null;
+    const item = this.data[slug];
+    if (!item || !item.url) return null;
+    if (Date.now() - item.timestamp > AVATAR_CACHE_TTL) {
+      return null;
+    }
+    return item.url;
+  },
+
+  set(slug, url) {
+    if (!slug || !url) return;
+    this.data[slug] = {
+      url: url,
+      timestamp: Date.now()
+    };
+    this.save();
+    this.updateStatusUi();
+  },
+
+  clear() {
+    this.data = {};
+    localStorage.removeItem(AVATAR_CACHE_KEY);
+    this.updateStatusUi();
+  },
+
+  getCount() {
+    const now = Date.now();
+    let count = 0;
+    for (const key of Object.keys(this.data)) {
+      if (this.data[key]?.url && now - this.data[key].timestamp <= AVATAR_CACHE_TTL) {
+        count++;
+      }
+    }
+    return count;
+  },
+
+  updateStatusUi() {
+    const label = document.getElementById("cache-status-count");
+    if (label) {
+      const total = Object.keys(fixedEvents).length || 81;
+      label.textContent = `${this.getCount()} / ${total} 位成員`;
+    }
+  }
+};
+
+function getMemberAvatarUrl(character) {
+  if (!character) return null;
+  const slug = Array.isArray(character) ? character[0] : character;
+  if (!slug) return null;
+
+  // 1. Check local cache
+  const cached = avatarCache.get(slug);
+  if (cached) return cached;
+
+  // 2. Fallback to API URL
+  const handle = memberYouTubeHandles[slug];
+  if (!handle) return null;
+
+  return `https://unavatar.io/youtube/@${handle}`;
+}
+
+function renderMemberAvatarHtml(character, emoji, extraClass = "") {
+  const slug = Array.isArray(character) ? character[0] : character;
+  const emojiStr = emoji || (fixedEvents[slug] ? fixedEvents[slug].emoji : "✨") || "✨";
+  const name = fixedEvents[slug] ? fixedEvents[slug].name : slug || "";
+  const avatarUrl = getMemberAvatarUrl(slug);
+
+  if (avatarUrl && slug) {
+    return `
+      <div class="photo-talent-avatar ${extraClass}" data-member="${slug}">
+        <img class="avatar-img" 
+             src="${avatarUrl}" 
+             alt="${name}" 
+             loading="lazy" 
+             onload="handleAvatarLoaded(this, '${slug}')"
+             onerror="handleAvatarError(this)" />
+        <span class="avatar-emoji-fallback u-hidden">${emojiStr}</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="photo-talent-avatar ${extraClass}">
+      <span class="avatar-emoji-fallback">${emojiStr}</span>
+    </div>
+  `;
+}
+
+window.handleAvatarLoaded = function(img, slug) {
+  if (img && img.src && !img.src.startsWith("data:")) {
+    avatarCache.set(slug, img.src);
+  }
+};
+
+window.handleAvatarError = function(img) {
+  if (!img) return;
+  img.classList.add("u-hidden");
+  const fallback = img.parentElement ? img.parentElement.querySelector(".avatar-emoji-fallback") : null;
+  if (fallback) {
+    fallback.classList.remove("u-hidden");
+  }
+};
+
+function prefetchMemberAvatars() {
+  if (!fixedEvents) return;
+  const slugs = Object.keys(fixedEvents);
+  let delay = 300;
+  for (const slug of slugs) {
+    if (!avatarCache.get(slug) && memberYouTubeHandles[slug]) {
+      setTimeout(() => {
+        const img = new Image();
+        img.src = `https://unavatar.io/youtube/@${memberYouTubeHandles[slug]}`;
+        img.onload = () => {
+          avatarCache.set(slug, img.src);
+        };
+      }, delay);
+      delay += 350;
+    }
+  }
+}
+
 // View Transitions Helper (uses CSS hardware-accelerated transitions)
 function executeTransition(updateDomFn) {
   updateDomFn();
@@ -63,11 +298,13 @@ Promise.all([
   fetch("special-events.json").then(res => res.json())
 ]).then(([fixedData, specialData]) => {
   fixedEvents = fixedData;
+  avatarCache.init();
   processSpecialEvents(specialData);
   populateSearchDatalist();
   setupEventListeners();
   renderApp();
   restoreSavedState();
+  prefetchMemberAvatars();
 }).catch(err => {
   console.error("データ読み込み失敗:", err);
 });
@@ -138,6 +375,59 @@ function setupEventListeners() {
       selectedDate = new Date();
       switchView("home");
       closeMobileSidebar();
+    });
+  }
+
+  // Settings & Avatar Cache Modal
+  const openSettingsBtn = document.getElementById("open-settings-btn");
+  const closeSettingsBtn = document.getElementById("close-settings-btn");
+  const settingsModal = document.getElementById("settings-modal");
+  const settingsModalOverlay = document.getElementById("settings-modal-overlay");
+  const refreshCacheBtn = document.getElementById("refresh-cache-btn");
+  const saveApiKeyBtn = document.getElementById("save-api-key-btn");
+  const ytApiKeyInput = document.getElementById("yt-api-key-input");
+  const apiKeyStatus = document.getElementById("api-key-status");
+
+  if (openSettingsBtn && settingsModal) {
+    openSettingsBtn.addEventListener("click", () => {
+      avatarCache.updateStatusUi();
+      if (ytApiKeyInput) {
+        ytApiKeyInput.value = localStorage.getItem("holokoyomi_yt_api_key") || "";
+      }
+      if (apiKeyStatus) apiKeyStatus.textContent = "";
+      settingsModal.classList.remove("u-hidden");
+      closeMobileSidebar();
+    });
+  }
+
+  const closeSettings = () => {
+    if (settingsModal) settingsModal.classList.add("u-hidden");
+  };
+
+  if (closeSettingsBtn) closeSettingsBtn.addEventListener("click", closeSettings);
+  if (settingsModalOverlay) settingsModalOverlay.addEventListener("click", closeSettings);
+
+  if (refreshCacheBtn) {
+    refreshCacheBtn.addEventListener("click", () => {
+      avatarCache.clear();
+      renderApp();
+      showToast("✨ 頭像快取已清除並重新整理！");
+      avatarCache.updateStatusUi();
+    });
+  }
+
+  if (saveApiKeyBtn && ytApiKeyInput) {
+    saveApiKeyBtn.addEventListener("click", () => {
+      const val = ytApiKeyInput.value.trim();
+      if (val) {
+        localStorage.setItem("holokoyomi_yt_api_key", val);
+        if (apiKeyStatus) apiKeyStatus.textContent = "✅ API 金鑰已儲存！";
+      } else {
+        localStorage.removeItem("holokoyomi_yt_api_key");
+        if (apiKeyStatus) apiKeyStatus.textContent = "ℹ️ 已清除自訂金鑰，使用預設解析。";
+      }
+      avatarCache.clear();
+      renderApp();
     });
   }
 
@@ -367,7 +657,7 @@ function renderHomeView() {
           <div class="photo-item upcoming-photo-card today-photo-card" style="--photo-color: ${charColor};" onclick="goToMemberOrCalendar('${ev.character}')">
             <div class="photo-item-inner card-inner">
               <div class="photo-item-img card-img">
-                <div class="photo-talent-avatar">${ev.emoji || "✨"}</div>
+                ${renderMemberAvatarHtml(ev.character, ev.emoji)}
                 <div class="photo-deco-notice deco-notice"></div>
                 <div class="photo-deco-kira deco-kira _rt">
                   <span class="_kira1">✦</span><span class="_kira2">✦</span>
@@ -511,7 +801,7 @@ function renderUpcomingSection() {
       <div class="photo-item upcoming-photo-card" style="--photo-color: ${charColor};" onclick="goToMemberOrCalendar('${item.character}')">
         <div class="photo-item-inner card-inner">
           <div class="photo-item-img card-img">
-            <div class="photo-talent-avatar">${item.emoji || "✨"}</div>
+            ${renderMemberAvatarHtml(item.character, item.emoji)}
             <div class="photo-deco-notice deco-notice"></div>
             <div class="photo-deco-kira deco-kira _rt">
               <span class="_kira1">✦</span><span class="_kira2">✦</span>
@@ -905,29 +1195,88 @@ function renderMembersList() {
   });
 
   const favorites = getFavorites();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
   membersGrid.innerHTML = filtered.map(member => {
     const colorVar = getMemberColorVar(member.slug);
     const isFav = favorites.includes(member.slug);
     const emojiStr = member.emoji || "✨";
+    const countdownInfo = getMemberNextCountdown(member, today);
 
     return `
-      <div class="member-card" style="--card-color: ${colorVar};" onclick="openMemberSpotlight('${member.slug}')">
-        <div class="member-color-indicator"></div>
-        <div class="member-oshi-box" title="${member.name}の推しマーク">${emojiStr}</div>
-        <div class="member-card-info">
-          <div class="member-card-name">${member.name}</div>
-          <div class="member-card-slug">${member.slug}</div>
+      <div class="photo-item member-photo-card" style="--photo-color: ${colorVar};" onclick="openMemberSpotlight('${member.slug}')">
+        <div class="photo-item-inner card-inner">
+          <div class="photo-item-img card-img">
+            ${renderMemberAvatarHtml(member.slug, emojiStr)}
+            <div class="photo-deco-notice deco-notice"></div>
+            <div class="photo-deco-kira deco-kira _rt">
+              <span class="_kira1">✦</span><span class="_kira2">✦</span>
+            </div>
+            <div class="photo-deco-kira deco-kira _lb">
+              <span class="_kira3">✦</span><span class="_kira4">✦</span>
+            </div>
+            <div class="photo-deco-hanko deco-hanko ${countdownInfo.className}">
+              <span class="hanko-sub">ホロこよみ</span>
+              <span class="hanko-text">${countdownInfo.label}</span>
+            </div>
+          </div>
+          <div class="photo-item-info card-info">
+            <div class="photo-item-name-block card-name-block">
+              <div class="photo-item-name card-name">
+                <span class="photo-item-name-jp card-name-jp">${member.name}</span>
+                <span class="photo-item-name-en card-name-en">${member.slug}</span>
+              </div>
+              <button type="button" class="photo-item-keep" onclick="event.stopPropagation(); toggleKeep(this)" title="お気に入り">🔖</button>
+            </div>
+            <div class="photo-item-event card-event member-card-sub">
+              <span>🎂 ${member.birthday || "—"}</span>
+              <span class="bullet-dot">•</span>
+              <span>📢 ${member.debut || "—"}</span>
+            </div>
+            <div class="photo-item-bottom card-bottom">
+              <span class="photo-item-date card-date">メンバー</span>
+              <div class="photo-item-icon card-icon">
+                <button type="button" class="ic-heart ${isFav ? 'is-active' : ''}" 
+                        onclick="burstMemberOshiMark(event, '${member.slug}', '${escapeHtml(emojiStr)}')" 
+                        title="${member.name}を推す！">♥</button>
+                <button type="button" class="ic-fukidashi" onclick="event.stopPropagation(); openMemberSpotlight('${member.slug}')" title="プロフィール">💬</button>
+                <button type="button" class="ic-share" onclick="event.stopPropagation(); shareEvent('${member.name}', '公式プロフィール')" title="シェア">↗</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <button type="button" 
-                class="member-card-heart-btn ${isFav ? 'is-active' : ''}" 
-                onclick="burstMemberOshiMark(event, '${member.slug}', '${escapeHtml(emojiStr)}')" 
-                title="${member.name}を推す！">
-          ♥
-        </button>
       </div>
     `;
   }).join("");
+}
+
+function getMemberNextCountdown(member, today) {
+  let closestDays = 999;
+  let closestType = "";
+  if (member.birthday) {
+    const occ = getNextOccurrence(member.birthday, today);
+    if (occ.diffDays < closestDays) {
+      closestDays = occ.diffDays;
+      closestType = "birthday";
+    }
+  }
+  if (member.debut) {
+    const occ = getNextOccurrence(member.debut, today);
+    if (occ.diffDays < closestDays) {
+      closestDays = occ.diffDays;
+      closestType = "debut";
+    }
+  }
+  if (closestDays === 0) {
+    return { label: closestType === "birthday" ? "誕祭！" : "記念！", className: "is-today" };
+  } else if (closestDays === 1) {
+    return { label: "明日！", className: "is-tomorrow" };
+  } else if (closestDays <= 7) {
+    return { label: `あと ${closestDays} 日`, className: "is-soon" };
+  } else {
+    return { label: `あと ${closestDays} 日`, className: "" };
+  }
 }
 
 // 點選成員後，畫面「以該成員為主」
@@ -985,9 +1334,14 @@ function renderMemberSpotlightContent(slug) {
   }
 
   if (memberSpotlightCard) {
+    const heroAvatarUrl = getMemberAvatarUrl(slug);
+    const heroAvatarHtml = heroAvatarUrl
+      ? `<img class="member-hero-avatar-img" src="${heroAvatarUrl}" alt="${member.name}" onload="handleAvatarLoaded(this, '${slug}')" onerror="this.outerHTML='<span class=\\'avatar-emoji-fallback\\'>${member.emoji || '✨'}</span>';" />`
+      : `<span class="avatar-emoji-fallback">${member.emoji || '✨'}</span>`;
+
     memberSpotlightCard.innerHTML = `
       <div class="member-hero-header" style="--member-color: ${colorVar};">
-        <div class="member-hero-emoji">${member.emoji || "✨"}</div>
+        <div class="member-hero-emoji">${heroAvatarHtml}</div>
         <div class="member-hero-title-box">
           <h2 class="member-hero-name">${member.name}</h2>
           <div class="member-hero-sub">${slug}</div>
