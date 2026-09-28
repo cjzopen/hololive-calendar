@@ -48,9 +48,14 @@ let currentDate = new Date();
 let selectedDate = new Date();
 let activeView = "home";
 let upcomingFilter = "all";
-let activeMemberFilter = null; // 當前聚焦的成員 slug，為 null 表示全部成員
+let activeMemberFilter = null; // 当選されたメンバーのslug
 
 const weekdayNames = ["日", "月", "火", "水", "木", "金", "土"];
+
+// View Transitions Helper (uses CSS hardware-accelerated transitions)
+function executeTransition(updateDomFn) {
+  updateDomFn();
+}
 
 // Initialize & Fetch Data
 Promise.all([
@@ -62,6 +67,7 @@ Promise.all([
   populateSearchDatalist();
   setupEventListeners();
   renderApp();
+  handleHashNavigation();
 }).catch(err => {
   console.error("データ読み込み失敗:", err);
 });
@@ -131,7 +137,6 @@ function setupEventListeners() {
       currentDate = new Date();
       selectedDate = new Date();
       switchView("home");
-      renderApp();
       closeMobileSidebar();
     });
   }
@@ -140,14 +145,14 @@ function setupEventListeners() {
   if (prevMonthBtn) {
     prevMonthBtn.onclick = () => {
       currentDate.setMonth(currentDate.getMonth() - 1);
-      renderCalendarView();
+      animateCalendarMonth("prev");
     };
   }
 
   if (nextMonthBtn) {
     nextMonthBtn.onclick = () => {
       currentDate.setMonth(currentDate.getMonth() + 1);
-      renderCalendarView();
+      animateCalendarMonth("next");
     };
   }
 
@@ -155,7 +160,7 @@ function setupEventListeners() {
     todayBtn.onclick = () => {
       currentDate = new Date();
       selectedDate = new Date();
-      renderCalendarView();
+      executeTransition(() => renderCalendarView());
     };
   }
 
@@ -179,7 +184,7 @@ function setupEventListeners() {
       upcomingFilterChips.forEach(c => c.classList.remove("active"));
       chip.classList.add("active");
       upcomingFilter = chip.dataset.filter;
-      renderUpcomingSection();
+      executeTransition(() => renderUpcomingSection());
     });
   });
 
@@ -190,8 +195,13 @@ function setupEventListeners() {
 
   if (memberBackBtn) {
     memberBackBtn.onclick = () => {
-      memberProfileSubview.classList.add("u-hidden");
-      membersListSubview.classList.remove("u-hidden");
+      executeTransition(() => {
+        activeMemberFilter = null;
+        updateSidebarMemberStatus();
+        memberProfileSubview.classList.add("u-hidden");
+        membersListSubview.classList.remove("u-hidden");
+        renderMembersList();
+      });
     };
   }
 
@@ -208,28 +218,54 @@ function closeMobileSidebar() {
 }
 
 function switchView(viewName) {
-  activeView = viewName;
-  navItems.forEach(item => {
-    item.classList.toggle("active", item.dataset.view === viewName);
-  });
-  pageViews.forEach(view => {
-    view.classList.toggle("active", view.id === `view-${viewName}`);
-  });
+  if (activeView === viewName && viewName !== "members") return;
 
-  if (viewName === "calendar") {
-    renderCalendarView();
-  } else if (viewName === "members") {
-    if (activeMemberFilter) {
-      openMemberSpotlight(activeMemberFilter);
-    } else {
-      membersListSubview.classList.remove("u-hidden");
-      memberProfileSubview.classList.add("u-hidden");
-      renderMembersList();
+  if (!window.location.hash.startsWith("#member:")) {
+    try { history.replaceState(null, "", "#" + viewName); } catch (e) {}
+  }
+
+  executeTransition(() => {
+    activeView = viewName;
+    navItems.forEach(item => {
+      item.classList.toggle("active", item.dataset.view === viewName);
+    });
+    pageViews.forEach(view => {
+      view.classList.toggle("active", view.id === `view-${viewName}`);
+    });
+
+    if (viewName === "calendar") {
+      renderCalendarView();
+    } else if (viewName === "members") {
+      if (activeMemberFilter) {
+        membersListSubview.classList.add("u-hidden");
+        memberProfileSubview.classList.remove("u-hidden");
+        renderMemberSpotlightContent(activeMemberFilter);
+      } else {
+        membersListSubview.classList.remove("u-hidden");
+        memberProfileSubview.classList.add("u-hidden");
+        renderMembersList();
+      }
+    } else if (viewName === "home") {
+      renderHomeView();
     }
-  } else if (viewName === "home") {
-    renderHomeView();
+  });
+}
+
+function handleHashNavigation() {
+  const hash = window.location.hash.replace(/^#/, "");
+  if (!hash) return;
+
+  if (hash === "home" || hash === "calendar" || hash === "members") {
+    switchView(hash);
+  } else if (hash.startsWith("member:")) {
+    const slug = hash.replace("member:", "");
+    if (fixedEvents && fixedEvents[slug]) {
+      openMemberSpotlight(slug);
+    }
   }
 }
+
+window.addEventListener("hashchange", handleHashNavigation);
 
 function clearMemberFocus() {
   activeMemberFilter = null;
@@ -237,7 +273,18 @@ function clearMemberFocus() {
   if (calendarMemberFilterBanner) {
     calendarMemberFilterBanner.classList.add("u-hidden");
   }
-  renderCalendarView();
+  executeTransition(() => renderCalendarView());
+}
+
+function animateCalendarMonth(direction) {
+  executeTransition(() => {
+    renderCalendarView();
+    if (calendarGrid) {
+      calendarGrid.classList.remove("slide-from-left", "slide-from-right");
+      void calendarGrid.offsetWidth;
+      calendarGrid.classList.add(direction === "prev" ? "slide-from-left" : "slide-from-right");
+    }
+  });
 }
 
 function updateSidebarMemberStatus() {
@@ -312,19 +359,41 @@ function renderHomeView() {
         const titleText = ev.type === "birthday" ? `${ev.name} の誕生日` : ev.type === "debut" ? `${ev.name} デビュー記念日` : ev.event;
 
         return `
-          <div class="today-photo-card" style="--card-color: ${charColor};" onclick="goToMemberOrCalendar('${ev.character}')">
-            <div class="card-top-bar">
-              <span class="card-badge">${typeLabel}</span>
-              <span class="card-deco-heart">♥</span>
-            </div>
-            <div class="card-talent-info">
-              <div class="talent-avatar">${ev.emoji || "✨"}</div>
-              <div class="talent-name-wrap">
-                <div class="talent-name-jp">${ev.name || "hololive"}</div>
-                <div class="talent-name-en">${ev.character || ""}</div>
+          <div class="photo-item upcoming-photo-card today-photo-card" style="--photo-color: ${charColor};" onclick="goToMemberOrCalendar('${ev.character}')">
+            <div class="photo-item-inner card-inner">
+              <div class="photo-item-img card-img">
+                <div class="photo-talent-avatar">${ev.emoji || "✨"}</div>
+                <div class="photo-deco-notice deco-notice"></div>
+                <div class="photo-deco-kira deco-kira _rt">
+                  <span class="_kira1">✦</span><span class="_kira2">✦</span>
+                </div>
+                <div class="photo-deco-kira deco-kira _lb">
+                  <span class="_kira3">✦</span><span class="_kira4">✦</span>
+                </div>
+                <div class="photo-deco-hanko deco-hanko is-today">
+                  <span class="hanko-sub">ホロこよみ</span>
+                  <span class="hanko-text">本日！</span>
+                </div>
+              </div>
+              <div class="photo-item-info card-info">
+                <div class="photo-item-name-block card-name-block">
+                  <div class="photo-item-name card-name">
+                    <span class="photo-item-name-jp card-name-jp">${ev.name}</span>
+                    <span class="photo-item-name-en card-name-en">${ev.character}</span>
+                  </div>
+                  <button type="button" class="photo-item-keep" onclick="event.stopPropagation(); toggleKeep(this)" title="お気に入り">🔖</button>
+                </div>
+                <div class="photo-item-event card-event">${titleText}</div>
+                <div class="photo-item-bottom card-bottom">
+                  <span class="photo-item-date card-date">${formatDisplayDate(today)}</span>
+                  <div class="photo-item-icon card-icon">
+                    <button type="button" class="ic-heart" onclick="event.stopPropagation(); toggleHeart(this)" title="いいね">♥</button>
+                    <button type="button" class="ic-fukidashi" onclick="event.stopPropagation();" title="コメント">💬</button>
+                    <button type="button" class="ic-share" onclick="event.stopPropagation(); shareEvent('${ev.name}', '${titleText}')" title="シェア">↗</button>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="card-event-desc">${titleText}</div>
           </div>
         `;
       }).join("");
@@ -428,27 +497,46 @@ function renderUpcomingSection() {
     return;
   }
 
+  // odeholo authentic PhotoItem Polaroid Cards
   upcomingEventsContainer.innerHTML = filteredList.slice(0, 24).map(item => {
     const countdownInfo = getCountdownBadge(item.diffDays);
     const charColor = getMemberColorVar(item.character);
-    const typeTitle = item.type === "birthday" ? "🎂 誕生日" : item.type === "debut" ? "📢 デビュー" : "✨ スペシャル";
 
     return `
-      <div class="upcoming-photo-card" style="--card-color: ${charColor};" onclick="goToMemberOrCalendar('${item.character}')">
-        <div class="card-color-stripe"></div>
-        <div class="card-meta-row">
-          <span class="event-date-text">${formatDisplayDate(item.dateObj)}</span>
-          <span class="countdown-tag ${countdownInfo.className}">${countdownInfo.label}</span>
-        </div>
-        <div class="card-body-row">
-          <div class="talent-emoji">${item.emoji || "✨"}</div>
-          <div class="text-wrap">
-            <div class="talent-name">${item.name}</div>
-            <div class="event-title">${item.event}</div>
+      <div class="photo-item upcoming-photo-card" style="--photo-color: ${charColor};" onclick="goToMemberOrCalendar('${item.character}')">
+        <div class="photo-item-inner card-inner">
+          <div class="photo-item-img card-img">
+            <div class="photo-talent-avatar">${item.emoji || "✨"}</div>
+            <div class="photo-deco-notice deco-notice"></div>
+            <div class="photo-deco-kira deco-kira _rt">
+              <span class="_kira1">✦</span><span class="_kira2">✦</span>
+            </div>
+            <div class="photo-deco-kira deco-kira _lb">
+              <span class="_kira3">✦</span><span class="_kira4">✦</span>
+            </div>
+            <div class="photo-deco-hanko deco-hanko ${countdownInfo.className}">
+              <span class="hanko-sub">ホロこよみ</span>
+              <span class="hanko-text">${countdownInfo.label}</span>
+            </div>
           </div>
-        </div>
-        <div class="card-footer-row">
-          <span class="event-type-label">${typeTitle}</span>
+          <div class="photo-item-info card-info">
+            <div class="photo-item-name-block card-name-block">
+              <div class="photo-item-name card-name">
+                <span class="photo-item-name-jp card-name-jp">${item.name}</span>
+                <span class="photo-item-name-en card-name-en">${item.character}</span>
+              </div>
+              <button type="button" class="photo-item-keep" onclick="event.stopPropagation(); toggleKeep(this)" title="お気に入り">🔖</button>
+            </div>
+            <div class="photo-item-event card-event">${item.event}</div>
+            <div class="photo-item-bottom card-bottom">
+              <span class="photo-item-date card-date">${formatDisplayDate(item.dateObj)}</span>
+              <div class="photo-item-icon card-icon">
+                <button type="button" class="ic-heart" onclick="event.stopPropagation(); toggleHeart(this)" title="いいね">♥</button>
+                <button type="button" class="ic-fukidashi" onclick="event.stopPropagation();" title="コメント">💬</button>
+                <button type="button" class="ic-share" onclick="event.stopPropagation(); shareEvent('${item.name}', '${item.event}')" title="シェア">↗</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -633,7 +721,7 @@ function renderCalendarView() {
       selectedDate = new Date(year, month, d);
       document.querySelectorAll(".calendar-cards-grid .day-cell").forEach(c => c.classList.remove("is-active"));
       cell.classList.add("is-active");
-      renderSelectedDayPanel();
+      renderSelectedDayPanel(true);
     };
 
     calendarGrid.appendChild(cell);
@@ -643,8 +731,14 @@ function renderCalendarView() {
 }
 
 // Right/Bottom Day Detail Panel
-function renderSelectedDayPanel() {
+function renderSelectedDayPanel(shouldAnimate = false) {
   if (!panelDateTitle || !panelEventsList) return;
+
+  if (shouldAnimate) {
+    panelEventsList.classList.remove("detail-inner");
+    void panelEventsList.offsetWidth;
+    panelEventsList.classList.add("detail-inner");
+  }
 
   const y = selectedDate.getFullYear();
   const m = selectedDate.getMonth() + 1;
@@ -828,18 +922,31 @@ function openMemberSpotlight(slug) {
   activeMemberFilter = slug;
   updateSidebarMemberStatus();
 
-  // 切換至成員檢視
-  activeView = "members";
-  navItems.forEach(item => {
-    item.classList.toggle("active", item.dataset.view === "members");
-  });
-  pageViews.forEach(view => {
-    view.classList.toggle("active", view.id === "view-members");
-  });
+  try {
+    history.replaceState(null, "", "#member:" + slug);
+  } catch (e) {}
 
-  // 隱藏成員列表，顯示個人專屬畫面
-  membersListSubview.classList.add("u-hidden");
-  memberProfileSubview.classList.remove("u-hidden");
+  executeTransition(() => {
+    // 切換至成員檢視
+    activeView = "members";
+    navItems.forEach(item => {
+      item.classList.toggle("active", item.dataset.view === "members");
+    });
+    pageViews.forEach(view => {
+      view.classList.toggle("active", view.id === "view-members");
+    });
+
+    // 隱藏成員列表，顯示個人專屬畫面
+    membersListSubview.classList.add("u-hidden");
+    memberProfileSubview.classList.remove("u-hidden");
+
+    renderMemberSpotlightContent(slug);
+  });
+}
+
+function renderMemberSpotlightContent(slug) {
+  const member = fixedEvents[slug];
+  if (!member) return;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -932,8 +1039,54 @@ function goToMemberOrCalendar(character) {
   }
 }
 
+// Interactive Card Helpers (odeholo inspired)
+function toggleKeep(btn) {
+  btn.classList.toggle("active");
+  btn.style.transform = "scale(1.25) rotate(6deg)";
+  setTimeout(() => {
+    btn.style.transform = "";
+  }, 250);
+}
+
+function toggleHeart(btn) {
+  btn.classList.toggle("active");
+  btn.style.transform = "scale(1.35)";
+  setTimeout(() => {
+    btn.style.transform = "";
+  }, 250);
+}
+
+function shareEvent(name, title) {
+  const text = `【ホロこよみ】${name} - ${title}`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(`${text}\n${window.location.href}`);
+    showToast("クリップボードにコピーしました！");
+  } else {
+    showToast(`${name}: ${title}`);
+  }
+}
+
+function showToast(msg) {
+  let toast = document.getElementById("koyomi-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "koyomi-toast";
+    toast.className = "koyomi-toast";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2200);
+}
+
 // Global exposure for inline onclick handlers
 window.switchView = switchView;
 window.openMemberSpotlight = openMemberSpotlight;
 window.goToMemberOrCalendar = goToMemberOrCalendar;
 window.clearMemberFocus = clearMemberFocus;
+window.toggleKeep = toggleKeep;
+window.toggleHeart = toggleHeart;
+window.shareEvent = shareEvent;
+window.showToast = showToast;
