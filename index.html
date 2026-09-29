@@ -49,7 +49,7 @@
           <span class="brand-badge">非公式</span>
         </div>
         <div class="brand-text">
-          <h1 class="brand-title">ホロこよみ</h1>
+          <h1 class="brand-title"><span class="_mint">ホロ</span><span class="_pink">こよみ</span></h1>
           <div class="brand-subtitle">hololive calendar</div>
         </div>
       </div>
@@ -74,10 +74,6 @@
       </div>
 
       <div class="sidebar-footer">
-        <button type="button" id="open-settings-btn" class="sidebar-settings-btn" title="頭像與快取設定">
-          <span>⚙️</span>
-          <span>設定與快取</span>
-        </button>
         <div class="sidebar-deco-dots">
           <span class="dot _pink"></span>
           <span class="dot _cyan"></span>
@@ -104,17 +100,20 @@
         <section id="view-home" class="page-view active">
           <div class="hero-banner">
             <div class="hero-content">
-              <div class="hero-tag"><span class="tag-hanko">おでかけ</span> TODAY'S HIGHLIGHT</div>
-              <h2 class="hero-title">きょうのホロライブ</h2>
+              <p class="hero-tag">TODAY'S HIGHLIGHT</p>
+              <h2 class="hero-title"><span class="_mint">きょうの</span><span class="_pink">ホロライブ</span></h2>
               <p class="hero-desc">ホロメンの誕生日、デビュー日、ライブ情報をお届け！</p>
             </div>
             <div class="hero-date-box" id="hero-date-box"></div>
+            <span class="deco-tri _pink" aria-hidden="true"></span>
+            <span class="deco-tri _mint" aria-hidden="true"></span>
+            <span class="deco-tri _line" aria-hidden="true"></span>
           </div>
 
           <!-- 今日有什麼 (Today's Events) -->
           <div class="section-block">
             <div class="section-header">
-              <h3 class="section-title"><span class="title-txt">きょうの予定</span></h3>
+              <h3 class="section-ttl"><span class="ttl-en">TODAY</span><span class="ttl-jp">きょうの予定</span></h3>
               <span class="section-sub" id="today-summary-label">読み込み中…</span>
             </div>
             <div id="today-events-container" class="today-events-container"></div>
@@ -123,7 +122,7 @@
           <!-- 最近有什麼 (Upcoming Events with Countdown) -->
           <div class="section-block">
             <div class="section-header">
-              <h3 class="section-title"><span class="title-txt">これからの予定</span></h3>
+              <h3 class="section-ttl"><span class="ttl-en">UPCOMING</span><span class="ttl-jp">これからの予定</span></h3>
               <span class="section-sub">記念日・ライブのカウントダウン</span>
             </div>
             <div class="upcoming-filter-bar">
@@ -140,6 +139,10 @@
              視圖 2: 完整月曆 (Full Calendar View)
              ============================================== -->
         <section id="view-calendar" class="page-view">
+          <div class="section-header">
+            <h3 class="section-ttl"><span class="ttl-en">CALENDAR</span><span class="ttl-jp">カレンダー</span></h3>
+            <span class="section-sub">日付をクリックすると、その日の予定を表示します</span>
+          </div>
           <div class="calendar-top-bar">
             <div class="calendar-nav-controls">
               <button id="prev-month" type="button" class="nav-arrow-btn" aria-label="前月">
@@ -216,7 +219,7 @@
           <!-- 成員列表子視圖 -->
           <div id="members-list-subview">
             <div class="section-header">
-              <h3 class="section-title"><span class="title-txt">メンバー一覧</span></h3>
+              <h3 class="section-ttl"><span class="ttl-en">MEMBERS</span><span class="ttl-jp">メンバー一覧</span></h3>
               <span class="section-sub">メンバーを選択すると、そのメンバー専用画面に切り替わります</span>
             </div>
             <div class="members-search-bar">
@@ -242,7 +245,7 @@
             <!-- 該成員活動日程 -->
             <div class="member-timeline-block">
               <div class="timeline-header">
-                <h4 class="member-timeline-title">🎪 出演イベント・ライブ一覧</h4>
+                <h4 class="section-ttl"><span class="ttl-en">EVENTS</span><span class="ttl-jp">出演イベント・ライブ</span></h4>
                 <span class="timeline-count" id="member-timeline-count"></span>
               </div>
               <div id="member-events-timeline" class="member-events-timeline"></div>
@@ -251,48 +254,13 @@
         </section>
       </main>
 
+      <div class="stripe-divider" aria-hidden="true"></div>
       <footer id="footer" class="site-footer">
         <div class="footer-inner">
           <div class="footer-brand">ホロこよみ · hololive calendar（非公式）</div>
           <small>&copy; cjzopen</small>
         </div>
       </footer>
-    </div>
-  </div>
-
-  <!-- 設定與快取彈窗 (Settings & Avatar Cache Modal) -->
-  <div id="settings-modal" class="settings-modal u-hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
-    <div id="settings-modal-overlay" class="settings-modal-overlay"></div>
-    <div class="settings-modal-card">
-      <div class="settings-modal-header">
-        <h3 id="settings-modal-title">⚙️ 頭像與快取設定</h3>
-        <button type="button" id="close-settings-btn" class="settings-close-btn" aria-label="關閉">&times;</button>
-      </div>
-      <div class="settings-modal-body">
-        <div class="settings-section">
-          <div class="settings-section-title">🖼️ YouTube 頻道頭像快取</div>
-          <p class="settings-desc">系統會透過 YouTube API 自動抓取各成員的 YouTube 官方頻道頭像，並儲存於瀏覽器快取中（有效期限 7 天），確保載入極速且不浪費網路流量。</p>
-          <div class="cache-status-box">
-            <div class="cache-status-info">
-              <span class="cache-status-label">快取狀態：</span>
-              <span id="cache-status-count" class="cache-status-val">讀取中...</span>
-            </div>
-            <button type="button" id="refresh-cache-btn" class="btn-refresh-cache">
-              🔄 重新整理 / 清除快取
-            </button>
-          </div>
-        </div>
-
-        <div class="settings-section">
-          <div class="settings-section-title">🔑 自訂 YouTube Data API Key（可選）</div>
-          <p class="settings-desc">預設透過 API 服務自動解析頭像。若你有自己的 Google Cloud YouTube Data API v3 金鑰，可填入此處使用專屬配額。</p>
-          <div class="api-key-input-group">
-            <input type="password" id="yt-api-key-input" placeholder="AIzaSy... (選填，留空則使用自動解析)" autocomplete="off" />
-            <button type="button" id="save-api-key-btn" class="btn-save-key">儲存金鑰</button>
-          </div>
-          <div id="api-key-status" class="api-key-status"></div>
-        </div>
-      </div>
     </div>
   </div>
 
