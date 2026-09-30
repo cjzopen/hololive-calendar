@@ -23,6 +23,11 @@ function escapeHtml(str) {
     .replaceAll('"', "&quot;");
 }
 
+// Lucide placeholder，由 icons.js 換成 <svg>
+function icon(name) {
+  return `<i class="icon" data-lucide="${name}"></i>`;
+}
+
 function renderStaticCard(slug, member) {
   const name = escapeHtml(member.name);
   const birthday = member.birthday || "";
@@ -32,7 +37,7 @@ function renderStaticCard(slug, member) {
     : `<span class="avatar-emoji-fallback">${escapeHtml(member.emoji || "✨")}</span>`;
 
   return [
-    `<article class="member-card" style="--photo-color: var(--${slug}-color, var(--color-main));" onclick="openMemberSpotlight('${slug}')">`,
+    `<article class="member-card" data-member="${slug}" style="--photo-color: var(--${slug}-color, var(--color-main));" onclick="openMemberSpotlight('${slug}')">`,
     `  <div class="member-card-img">`,
     `    <div class="member-avatar">${avatarHtml}</div>`,
     `  </div>`,
@@ -43,8 +48,8 @@ function renderStaticCard(slug, member) {
     `    </div>`,
     `  </div>`,
     `  <div class="member-card-dates">`,
-    `    <time datetime="${birthday}" title="誕生日">🎂 ${birthday || "—"}</time>`,
-    `    <time datetime="${debut}" title="デビュー日">📢 ${debut || "—"}</time>`,
+    `    <time datetime="${birthday}" title="誕生日">${icon("cake")}${birthday || "—"}</time>`,
+    `    <time datetime="${debut}" title="デビュー日">${icon("megaphone")}${debut || "—"}</time>`,
     `  </div>`,
     `</article>`
   ].map(line => indent + line).join("\n");
