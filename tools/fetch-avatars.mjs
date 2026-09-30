@@ -52,7 +52,8 @@ let failCount = 0;
 for (const [slug, member] of Object.entries(fixedEvents)) {
   if (targetSlugs.length > 0 && !targetSlugs.includes(slug)) continue;
   if (!member.youtube) {
-    console.log(`SKIP ${slug}: fixed-events.json 沒有 youtube 欄位`);
+    const reason = member.avatar === "manual" ? "頭像為手動製作（avatar: manual）" : "fixed-events.json 沒有 youtube 欄位";
+    console.log(`SKIP ${slug}: ${reason}`);
     continue;
   }
 

@@ -3,567 +3,573 @@
     "name": "ときのそら",
     "emoji": "🐻",
     "birthday": "05-15",
-    "debut": "09-07",
+    "debut": "2017-09-07",
     "youtube": "TokinoSora"
   },
   "roboco": {
     "name": "ロボ子さん",
     "emoji": "🤖",
     "birthday": "05-23",
-    "debut": "03-04",
+    "debut": "2018-03-04",
     "youtube": "Robocosan"
   },
   "miko": {
     "name": "さくらみこ",
     "emoji": "🌸",
     "birthday": "03-05",
-    "debut": "08-01",
+    "debut": "2018-08-01",
     "youtube": "SakuraMiko"
   },
   "suisei": {
     "name": "星街すいせい",
     "emoji": "☄️",
     "birthday": "03-22",
-    "debut": "03-22",
+    "debut": "2018-03-22",
     "youtube": "HoshimachiSuisei"
   },
   "azki": {
     "name": "AZKi",
     "emoji": "⚒️",
     "birthday": "07-01",
-    "debut": "11-15",
+    "debut": "2018-11-15",
     "youtube": "AZKi"
   },
   "aki": {
     "name": "アキ・ローゼンタール",
     "emoji": "🍎",
     "birthday": "02-17",
-    "debut": "06-01",
+    "debut": "2018-06-01",
     "youtube": "AkiRosenthal"
   },
   "mel": {
     "name": "夜空メル",
     "emoji": "🌟",
     "birthday": "10-31",
-    "debut": "05-13",
+    "debut": "2018-05-13",
     "youtube": "YozoraMel"
   },
   "fubuki": {
     "name": "白上フブキ",
     "emoji": "🌽",
     "birthday": "10-05",
-    "debut": "06-01",
+    "debut": "2018-06-01",
     "youtube": "ShirakamiFubuki"
   },
   "kurosama": {
-    "name": "黑様",
-    "emoji": "",
+    "name": "黒様",
+    "emoji": "🥤",
     "birthday": "09-06",
-    "debut": "09-07",
-    "youtube": "ShirakamiFubuki"
+    "debut": "2019-09-07",
+    "avatar": "manual"
+  },
+  "burinyan": {
+    "name": "ホワイトブリニャン",
+    "emoji": "",
+    "debut": "2021-04-19",
+    "avatar": "manual"
   },
   "matsuri": {
     "name": "夏色まつり",
     "emoji": "🏮",
     "birthday": "07-22",
-    "debut": "06-01",
+    "debut": "2018-06-01",
     "youtube": "NatsuiroMatsuri"
   },
   "haato": {
     "name": "赤井はあと",
     "emoji": "❤️",
     "birthday": "08-10",
-    "debut": "06-02",
+    "debut": "2018-06-02",
     "youtube": "AkaiHaato"
   },
   "aqua": {
     "name": "湊あくあ",
     "emoji": "⚓",
     "birthday": "12-01",
-    "debut": "08-08",
+    "debut": "2018-08-08",
     "youtube": "MinatoAqua"
   },
   "shion": {
     "name": "紫咲シオン",
     "emoji": "🌙",
     "birthday": "12-08",
-    "debut": "08-17",
+    "debut": "2018-08-17",
     "youtube": "MurasakiShion"
   },
   "ayame": {
     "name": "百鬼あやめ",
     "emoji": "😈",
     "birthday": "12-13",
-    "debut": "09-03",
+    "debut": "2018-09-03",
     "youtube": "NakiriAyame"
   },
   "choco": {
     "name": "癒月ちょこ",
     "emoji": "💋",
     "birthday": "02-14",
-    "debut": "09-04",
+    "debut": "2018-09-04",
     "youtube": "YuzukiChoco"
   },
   "subaru": {
     "name": "大空スバル",
     "emoji": "🚑",
     "birthday": "07-02",
-    "debut": "09-16",
+    "debut": "2018-09-16",
     "youtube": "OozoraSubaru"
   },
   "mio": {
     "name": "大神ミオ",
     "emoji": "🌲",
     "birthday": "08-20",
-    "debut": "12-07",
+    "debut": "2018-12-07",
     "youtube": "OokamiMio"
   },
   "okayu": {
     "name": "猫又おかゆ",
     "emoji": "🍙",
     "birthday": "02-22",
-    "debut": "04-06",
+    "debut": "2019-04-06",
     "youtube": "NekomataOkayu"
   },
   "korone": {
     "name": "戌神ころね",
     "emoji": "🥐",
     "birthday": "10-01",
-    "debut": "04-13",
+    "debut": "2019-04-13",
     "youtube": "InugamiKorone"
   },
   "pekora": {
     "name": "兎田ぺこら",
     "emoji": "👯",
     "birthday": "01-12",
-    "debut": "07-17",
+    "debut": "2019-07-17",
     "youtube": "usadapekora"
   },
   "flare": {
     "name": "不知火フレア",
     "emoji": "🔥",
     "birthday": "04-02",
-    "debut": "08-07",
+    "debut": "2019-08-07",
     "youtube": "ShiranuiFlare"
   },
   "noel": {
     "name": "白銀ノエル",
     "emoji": "⚔️",
     "birthday": "11-24",
-    "debut": "08-08",
+    "debut": "2019-08-08",
     "youtube": "ShiroganeNoel"
   },
   "marine": {
     "name": "宝鐘マリン",
     "emoji": "🏴‍☠️",
     "birthday": "07-30",
-    "debut": "08-11",
+    "debut": "2019-08-11",
     "youtube": "HoushouMarine"
   },
   "coco": {
     "name": "桐生ココ",
     "emoji": "🐉",
     "birthday": "06-17",
-    "debut": "12-28",
+    "debut": "2019-12-28",
     "youtube": "KiryuCoco"
   },
   "kanata": {
     "name": "天音かなた",
     "emoji": "💫",
     "birthday": "04-22",
-    "debut": "12-27",
+    "debut": "2019-12-27",
     "youtube": "AmaneKanata"
   },
   "watame": {
     "name": "角巻わため",
     "emoji": "🐏",
     "birthday": "06-06",
-    "debut": "12-29",
+    "debut": "2019-12-29",
     "youtube": "TsunomakiWatame"
   },
   "towa": {
     "name": "常闇トワ",
     "emoji": "👾",
     "birthday": "08-08",
-    "debut": "01-03",
+    "debut": "2020-01-03",
     "youtube": "TokoyamiTowa"
   },
   "luna": {
     "name": "姫森ルーナ",
     "emoji": "🍬",
     "birthday": "10-10",
-    "debut": "01-04",
+    "debut": "2020-01-04",
     "youtube": "HimemoriLuna"
   },
   "lamy": {
     "name": "雪花ラミィ",
     "emoji": "☃️",
     "birthday": "11-15",
-    "debut": "08-12",
+    "debut": "2020-08-12",
     "youtube": "YukihanaLamy"
   },
   "nene": {
     "name": "桃鈴ねね",
     "emoji": "🍑",
     "birthday": "03-02",
-    "debut": "08-13",
+    "debut": "2020-08-13",
     "youtube": "MomosuzuNene"
   },
   "botan": {
     "name": "獅白ぼたん",
     "emoji": "♌",
     "birthday": "09-08",
-    "debut": "08-14",
+    "debut": "2020-08-14",
     "youtube": "ShishiroBotan"
   },
   "polka": {
     "name": "尾丸ポルカ",
     "emoji": "🎪",
     "birthday": "01-30",
-    "debut": "08-16",
+    "debut": "2020-08-16",
     "youtube": "OmaruPolka"
   },
   "laplus": {
     "name": "ラプラス・ダークネス",
     "emoji": "🛸",
     "birthday": "05-25",
-    "debut": "11-26",
+    "debut": "2021-11-26",
     "youtube": "LaplusDarknesss"
   },
   "lui": {
     "name": "鷹嶺ルイ",
     "emoji": "🥀",
     "birthday": "06-11",
-    "debut": "11-27",
+    "debut": "2021-11-27",
     "youtube": "TakaneLui"
   },
   "koyori": {
     "name": "博衣こより",
     "emoji": "🧪",
     "birthday": "03-15",
-    "debut": "11-28",
+    "debut": "2021-11-28",
     "youtube": "HakuiKoyori"
   },
   "ai-koyori": {
     "name": "AIこより",
     "emoji": "",
     "birthday": "09-25",
-    "debut": "09-25",
-    "youtube": "HakuiKoyori"
+    "debut": "2023-09-25",
+    "avatar": "manual"
   },
   "chloe": {
     "name": "沙花叉クロヱ",
     "emoji": "🎣",
     "birthday": "05-18",
-    "debut": "11-29",
+    "debut": "2021-11-29",
     "youtube": "SakamataChloe"
   },
   "iroha": {
     "name": "風真いろは",
     "emoji": "🍃",
     "birthday": "06-18",
-    "debut": "11-30",
+    "debut": "2021-11-30",
     "youtube": "KazamaIroha"
   },
   "risu": {
     "name": "アユンダ・リス",
     "emoji": "🐿️",
     "birthday": "01-15",
-    "debut": "04-10",
+    "debut": "2020-04-10",
     "youtube": "AyundaRisu"
   },
   "moona": {
     "name": "ムーナ・ホシノヴァ",
     "emoji": "🔮",
     "birthday": "02-15",
-    "debut": "04-11",
+    "debut": "2020-04-11",
     "youtube": "MoonaHoshinova"
   },
   "iofi": {
     "name": "アイラニ・イオフィフティーン",
     "emoji": "🎨",
     "birthday": "07-15",
-    "debut": "04-12",
+    "debut": "2020-04-12",
     "youtube": "AiraniIofifteen"
   },
   "ollie": {
     "name": "クレイジー・オリー",
     "emoji": "🧟",
     "birthday": "10-13",
-    "debut": "12-04",
+    "debut": "2020-12-04",
     "youtube": "KureijiOllie"
   },
   "anya": {
     "name": "アーニャ・メルフィッサ",
     "emoji": "🍂",
     "birthday": "03-12",
-    "debut": "12-05",
+    "debut": "2020-12-05",
     "youtube": "AnyaMelfissa"
   },
   "reine": {
     "name": "パヴォリア・レイネ",
     "emoji": "🦚",
     "birthday": "09-09",
-    "debut": "12-06",
+    "debut": "2020-12-06",
     "youtube": "PavoliaReine"
   },
   "zeta": {
     "name": "ベスティア・ゼータ",
     "emoji": "📜",
     "birthday": "11-07",
-    "debut": "03-25",
+    "debut": "2022-03-25",
     "youtube": "VestiaZeta"
   },
   "kaela": {
     "name": "カエラ・コヴァルスキア",
     "emoji": "🔨",
     "birthday": "08-30",
-    "debut": "03-26",
+    "debut": "2022-03-26",
     "youtube": "KaelaKovalskia"
   },
   "kobo": {
     "name": "こぼ・かなえる",
     "emoji": "☔",
     "birthday": "12-12",
-    "debut": "03-27",
+    "debut": "2022-03-27",
     "youtube": "KoboKanaeru"
   },
   "calli": {
     "name": "森カリオペ",
     "emoji": "💀",
     "birthday": "04-04",
-    "debut": "09-12",
+    "debut": "2020-09-12",
     "youtube": "MoriCalliope"
   },
   "kiara": {
     "name": "小鳥遊キアラ",
     "emoji": "🐔",
     "birthday": "07-06",
-    "debut": "09-12",
+    "debut": "2020-09-12",
     "youtube": "TakanashiKiara"
   },
   "ina": {
     "name": "一伊那尓栖",
     "emoji": "🐙",
     "birthday": "05-20",
-    "debut": "09-13",
+    "debut": "2020-09-13",
     "youtube": "NinomaeInanis"
   },
   "gura": {
     "name": "がうる・ぐら",
     "emoji": "🔱",
     "birthday": "06-20",
-    "debut": "09-13",
+    "debut": "2020-09-13",
     "youtube": "GawrGura"
   },
   "amelia": {
     "name": "ワトソン・アメリア",
     "emoji": "🔎",
     "birthday": "01-06",
-    "debut": "09-13",
+    "debut": "2020-09-13",
     "youtube": "WatsonAmelia"
   },
   "irys": {
     "name": "IRyS",
     "emoji": "💎",
     "birthday": "03-07",
-    "debut": "07-11",
+    "debut": "2021-07-11",
     "youtube": "IRyS"
   },
   "kronii": {
     "name": "オーロ・クロニー",
     "emoji": "⏳",
     "birthday": "03-14",
-    "debut": "08-22",
+    "debut": "2021-08-22",
     "youtube": "OuroKronii"
   },
   "bae": {
     "name": "ハコス・ベールズ",
     "emoji": "🎲",
     "birthday": "02-29",
-    "debut": "08-22",
+    "debut": "2021-08-22",
     "youtube": "HakosBaelz"
   },
   "fauna": {
     "name": "セレス・ファウナ",
     "emoji": "🌿",
     "birthday": "03-21",
-    "debut": "08-22",
+    "debut": "2021-08-22",
     "youtube": "CeresFauna"
   },
   "mumei": {
     "name": "七詩ムメイ",
     "emoji": "🦉",
     "birthday": "08-04",
-    "debut": "08-22",
+    "debut": "2021-08-22",
     "youtube": "NanashiMumei"
   },
   "sana": {
     "name": "九十九佐命",
     "emoji": "🪐",
     "birthday": "06-10",
-    "debut": "08-22",
+    "debut": "2021-08-22",
     "youtube": "TsukumoSana"
   },
   "shiori": {
     "name": "シオリ・ノヴェラ",
     "emoji": "📖",
     "birthday": "05-02",
-    "debut": "07-30",
+    "debut": "2023-07-30",
     "youtube": "ShioriNovella"
   },
   "bijou": {
     "name": "古石ビジュー",
     "emoji": "🗿",
     "birthday": "04-14",
-    "debut": "07-30",
+    "debut": "2023-07-30",
     "youtube": "KosekiBijou"
   },
   "nerissa": {
     "name": "ネリッサ・レイヴンクロフト",
     "emoji": "🎼",
     "birthday": "11-21",
-    "debut": "07-31",
+    "debut": "2023-07-31",
     "youtube": "NerissaRavencroft"
   },
   "fuwawa": {
     "name": "フワワ・アビスガード",
     "emoji": "🐾",
     "birthday": "02-01",
-    "debut": "07-31",
+    "debut": "2023-07-31",
     "youtube": "FUWAMOCOch"
   },
   "mococo": {
     "name": "モココ・アビスガード",
     "emoji": "🐾",
     "birthday": "02-02",
-    "debut": "07-31",
+    "debut": "2023-07-31",
     "youtube": "FUWAMOCOch"
   },
   "elizabeth": {
     "name": "エリザベス・ローズ・ブラッドフレイム",
     "emoji": "💄",
     "birthday": "04-25",
-    "debut": "06-21",
+    "debut": "2024-06-21",
     "youtube": "holoen_erbloodflame"
   },
   "gigi": {
     "name": "ジジ・ムリン",
     "emoji": "🎮",
     "birthday": "10-18",
-    "debut": "06-21",
+    "debut": "2024-06-21",
     "youtube": "GigiMurin"
   },
   "cecilia": {
     "name": "セシリア・イマーグリーン",
     "emoji": "🍵",
     "birthday": "11-11",
-    "debut": "06-22",
+    "debut": "2024-06-22",
     "youtube": "holoen_ceciliaimmergreen"
   },
   "raora": {
     "name": "ラオーラ・パンテーラ",
     "emoji": "🐱",
     "birthday": "05-11",
-    "debut": "06-22",
+    "debut": "2024-06-22",
     "youtube": "holoen_raorapanthera"
   },
   "ao": {
     "name": "火威青",
     "emoji": "🖋️",
     "birthday": "02-27",
-    "debut": "09-09",
+    "debut": "2023-09-09",
     "youtube": "HiodoshiAo"
   },
   "kanade": {
     "name": "音乃瀬奏",
     "emoji": "🎹",
     "birthday": "04-20",
-    "debut": "09-09",
+    "debut": "2023-09-09",
     "youtube": "OtonoseKanade"
   },
   "ririka": {
     "name": "一条莉々華",
     "emoji": "🌃",
     "birthday": "05-12",
-    "debut": "09-09",
+    "debut": "2023-09-09",
     "youtube": "IchijouRirika"
   },
   "raden": {
     "name": "儒烏風亭らでん",
     "emoji": "🐚",
     "birthday": "02-04",
-    "debut": "09-10",
+    "debut": "2023-09-10",
     "youtube": "JuufuuteiRaden"
   },
   "hajime": {
     "name": "轟はじめ",
     "emoji": "🐧",
     "birthday": "06-07",
-    "debut": "09-10",
+    "debut": "2023-09-10",
     "youtube": "TodorokiHajime"
   },
   "riona": {
     "name": "響咲リオナ",
     "emoji": "🎤",
     "birthday": "05-29",
-    "debut": "11-09",
+    "debut": "2024-11-09",
     "youtube": "IsakiRiona"
   },
   "niko": {
     "name": "虎金妃笑虎",
     "emoji": "🐅",
     "birthday": "07-25",
-    "debut": "11-09",
+    "debut": "2024-11-09",
     "youtube": "KoganeiNiko"
   },
   "su": {
     "name": "水宮枢",
     "emoji": "💙",
     "birthday": "06-16",
-    "debut": "11-09",
+    "debut": "2024-11-09",
     "youtube": "MizumiyaSu"
   },
   "chihaya": {
     "name": "輪堂千速",
     "emoji": "🎧",
     "birthday": "07-08",
-    "debut": "11-09",
+    "debut": "2024-11-09",
     "youtube": "RindoChihaya"
   },
   "vivi": {
     "name": "綺々羅々ヴィヴィ",
     "emoji": "✨",
     "birthday": "08-27",
-    "debut": "11-09",
+    "debut": "2024-11-09",
     "youtube": "KikiraraVivi"
   },
   "mela": {
     "name": "熱千めら",
     "emoji": "🧯",
     "birthday": "04-16",
-    "debut": "09-24",
+    "debut": "2026-09-24",
     "youtube": "AchichiMela"
   },
   "sopia": {
     "name": "宙科そぴあ",
     "emoji": "📡",
     "birthday": "06-13",
-    "debut": "09-24",
+    "debut": "2026-09-24",
     "youtube": "SorashinaSopia"
   },
   "kyoko": {
     "name": "百灯キョーコ",
     "emoji": "👮📢",
     "birthday": "05-08",
-    "debut": "09-25",
+    "debut": "2026-09-25",
     "youtube": "HyakutoKyoko"
   },
   "tsuzuri": {
     "name": "鈴鳴つづり",
     "emoji": "🐐💌",
     "birthday": "06-28",
-    "debut": "09-25",
+    "debut": "2026-09-25",
     "youtube": "SuzunaTsuzuri"
   }
 }
