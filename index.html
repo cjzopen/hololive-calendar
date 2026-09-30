@@ -27,6 +27,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@14/swiper-bundle.min.css" />
   <link rel="stylesheet" href="style.css" />
 
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYXNTEXRJ5"></script>
@@ -84,14 +85,10 @@
     </aside>
 
     <div class="main-wrapper">
-      <!-- 手機頂部列 (Mobile Topbar) -->
-      <header id="mobile-topbar" class="mobile-topbar">
-        <button type="button" id="menu-toggle" class="menu-toggle" aria-label="メニューを開く">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-        </button>
-        <div class="topbar-title">ホロこよみ</div>
-        <button type="button" id="quick-today-btn" class="quick-today-btn">今日 ✨</button>
-      </header>
+      <!-- 選單按鈕 (Floating Menu Toggle) -->
+      <button type="button" id="menu-toggle" class="menu-toggle" aria-label="メニューを開く">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
 
       <main id="main-content" class="main-content">
         <!-- ==============================================
@@ -104,7 +101,12 @@
               <h2 class="hero-title"><span class="_mint">きょうの</span><span class="_pink">ホロライブ</span></h2>
               <p class="hero-desc">ホロメンの誕生日、デビュー日、ライブ情報をお届け！</p>
             </div>
-            <div class="hero-date-box" id="hero-date-box"></div>
+            <div class="hero-date-box" id="hero-date-box">
+              <span class="hero-date-today">TODAY</span>
+              <div class="hero-date-year">&nbsp;</div>
+              <div class="hero-date-number">--.--</div>
+              <div class="hero-date-day">&nbsp;</div>
+            </div>
             <span class="deco-tri _pink" aria-hidden="true"></span>
             <span class="deco-tri _mint" aria-hidden="true"></span>
             <span class="deco-tri _line" aria-hidden="true"></span>
@@ -116,7 +118,9 @@
               <h3 class="section-ttl"><span class="ttl-en">TODAY</span><span class="ttl-jp">きょうの予定</span></h3>
               <span class="section-sub" id="today-summary-label">読み込み中…</span>
             </div>
-            <div id="today-events-container" class="today-events-container"></div>
+            <div id="today-events-container" class="today-events-container">
+              <div class="today-skeleton" aria-hidden="true"></div>
+            </div>
           </div>
 
           <!-- 最近有什麼 (Upcoming Events with Countdown) -->
@@ -225,7 +229,1240 @@
             <div class="members-search-bar">
               <input type="text" id="members-search-input" placeholder="🔍 名前・推しマーク・IDで検索…" />
             </div>
-            <div id="members-grid" class="members-grid"></div>
+            <div id="members-grid" class="members-grid">
+              <!-- static-members:start -->
+              <article class="member-card" style="--photo-color: var(--sora-color, var(--color-main));" onclick="openMemberSpotlight('sora')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/sora.jpg" alt="ときのそら" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">ときのそら</span>
+                    <span class="name-en">sora</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="05-15" title="誕生日">🎂 05-15</time>
+                  <time datetime="2017-09-07" title="デビュー日">📢 2017-09-07</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--roboco-color, var(--color-main));" onclick="openMemberSpotlight('roboco')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/roboco.jpg" alt="ロボ子さん" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">ロボ子さん</span>
+                    <span class="name-en">roboco</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="05-23" title="誕生日">🎂 05-23</time>
+                  <time datetime="2018-03-04" title="デビュー日">📢 2018-03-04</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--miko-color, var(--color-main));" onclick="openMemberSpotlight('miko')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/miko.jpg" alt="さくらみこ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">さくらみこ</span>
+                    <span class="name-en">miko</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="03-05" title="誕生日">🎂 03-05</time>
+                  <time datetime="2018-08-01" title="デビュー日">📢 2018-08-01</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--suisei-color, var(--color-main));" onclick="openMemberSpotlight('suisei')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/suisei.jpg" alt="星街すいせい" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">星街すいせい</span>
+                    <span class="name-en">suisei</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="03-22" title="誕生日">🎂 03-22</time>
+                  <time datetime="2018-03-22" title="デビュー日">📢 2018-03-22</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--azki-color, var(--color-main));" onclick="openMemberSpotlight('azki')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/azki.jpg" alt="AZKi" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">AZKi</span>
+                    <span class="name-en">azki</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="07-01" title="誕生日">🎂 07-01</time>
+                  <time datetime="2018-11-15" title="デビュー日">📢 2018-11-15</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--aki-color, var(--color-main));" onclick="openMemberSpotlight('aki')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/aki.jpg" alt="アキ・ローゼンタール" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">アキ・ローゼンタール</span>
+                    <span class="name-en">aki</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="02-17" title="誕生日">🎂 02-17</time>
+                  <time datetime="2018-06-01" title="デビュー日">📢 2018-06-01</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--mel-color, var(--color-main));" onclick="openMemberSpotlight('mel')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/mel.jpg" alt="夜空メル" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">夜空メル</span>
+                    <span class="name-en">mel</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="10-31" title="誕生日">🎂 10-31</time>
+                  <time datetime="2018-05-13" title="デビュー日">📢 2018-05-13</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--fubuki-color, var(--color-main));" onclick="openMemberSpotlight('fubuki')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/fubuki.jpg" alt="白上フブキ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">白上フブキ</span>
+                    <span class="name-en">fubuki</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="10-05" title="誕生日">🎂 10-05</time>
+                  <time datetime="2018-06-01" title="デビュー日">📢 2018-06-01</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--kurosama-color, var(--color-main));" onclick="openMemberSpotlight('kurosama')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/kurosama.jpg" alt="黒様" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">黒様</span>
+                    <span class="name-en">kurosama</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="09-06" title="誕生日">🎂 09-06</time>
+                  <time datetime="2019-09-07" title="デビュー日">📢 2019-09-07</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--burinyan-color, var(--color-main));" onclick="openMemberSpotlight('burinyan')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/burinyan.jpg" alt="ホワイトブリニャン" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">ホワイトブリニャン</span>
+                    <span class="name-en">burinyan</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="" title="誕生日">🎂 —</time>
+                  <time datetime="2021-04-19" title="デビュー日">📢 2021-04-19</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--matsuri-color, var(--color-main));" onclick="openMemberSpotlight('matsuri')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/matsuri.jpg" alt="夏色まつり" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">夏色まつり</span>
+                    <span class="name-en">matsuri</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="07-22" title="誕生日">🎂 07-22</time>
+                  <time datetime="2018-06-01" title="デビュー日">📢 2018-06-01</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--haato-color, var(--color-main));" onclick="openMemberSpotlight('haato')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/haato.jpg" alt="赤井はあと" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">赤井はあと</span>
+                    <span class="name-en">haato</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="08-10" title="誕生日">🎂 08-10</time>
+                  <time datetime="2018-06-02" title="デビュー日">📢 2018-06-02</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--aqua-color, var(--color-main));" onclick="openMemberSpotlight('aqua')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/aqua.jpg" alt="湊あくあ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">湊あくあ</span>
+                    <span class="name-en">aqua</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="12-01" title="誕生日">🎂 12-01</time>
+                  <time datetime="2018-08-08" title="デビュー日">📢 2018-08-08</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--shion-color, var(--color-main));" onclick="openMemberSpotlight('shion')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/shion.jpg" alt="紫咲シオン" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">紫咲シオン</span>
+                    <span class="name-en">shion</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="12-08" title="誕生日">🎂 12-08</time>
+                  <time datetime="2018-08-17" title="デビュー日">📢 2018-08-17</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--ayame-color, var(--color-main));" onclick="openMemberSpotlight('ayame')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/ayame.jpg" alt="百鬼あやめ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">百鬼あやめ</span>
+                    <span class="name-en">ayame</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="12-13" title="誕生日">🎂 12-13</time>
+                  <time datetime="2018-09-03" title="デビュー日">📢 2018-09-03</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--choco-color, var(--color-main));" onclick="openMemberSpotlight('choco')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/choco.jpg" alt="癒月ちょこ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">癒月ちょこ</span>
+                    <span class="name-en">choco</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="02-14" title="誕生日">🎂 02-14</time>
+                  <time datetime="2018-09-04" title="デビュー日">📢 2018-09-04</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--subaru-color, var(--color-main));" onclick="openMemberSpotlight('subaru')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/subaru.jpg" alt="大空スバル" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">大空スバル</span>
+                    <span class="name-en">subaru</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="07-02" title="誕生日">🎂 07-02</time>
+                  <time datetime="2018-09-16" title="デビュー日">📢 2018-09-16</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--mio-color, var(--color-main));" onclick="openMemberSpotlight('mio')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/mio.jpg" alt="大神ミオ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">大神ミオ</span>
+                    <span class="name-en">mio</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="08-20" title="誕生日">🎂 08-20</time>
+                  <time datetime="2018-12-07" title="デビュー日">📢 2018-12-07</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--okayu-color, var(--color-main));" onclick="openMemberSpotlight('okayu')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/okayu.jpg" alt="猫又おかゆ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">猫又おかゆ</span>
+                    <span class="name-en">okayu</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="02-22" title="誕生日">🎂 02-22</time>
+                  <time datetime="2019-04-06" title="デビュー日">📢 2019-04-06</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--korone-color, var(--color-main));" onclick="openMemberSpotlight('korone')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/korone.jpg" alt="戌神ころね" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">戌神ころね</span>
+                    <span class="name-en">korone</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="10-01" title="誕生日">🎂 10-01</time>
+                  <time datetime="2019-04-13" title="デビュー日">📢 2019-04-13</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--pekora-color, var(--color-main));" onclick="openMemberSpotlight('pekora')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/pekora.jpg" alt="兎田ぺこら" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">兎田ぺこら</span>
+                    <span class="name-en">pekora</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="01-12" title="誕生日">🎂 01-12</time>
+                  <time datetime="2019-07-17" title="デビュー日">📢 2019-07-17</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--flare-color, var(--color-main));" onclick="openMemberSpotlight('flare')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/flare.jpg" alt="不知火フレア" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">不知火フレア</span>
+                    <span class="name-en">flare</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="04-02" title="誕生日">🎂 04-02</time>
+                  <time datetime="2019-08-07" title="デビュー日">📢 2019-08-07</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--noel-color, var(--color-main));" onclick="openMemberSpotlight('noel')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/noel.jpg" alt="白銀ノエル" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">白銀ノエル</span>
+                    <span class="name-en">noel</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="11-24" title="誕生日">🎂 11-24</time>
+                  <time datetime="2019-08-08" title="デビュー日">📢 2019-08-08</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--marine-color, var(--color-main));" onclick="openMemberSpotlight('marine')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/marine.jpg" alt="宝鐘マリン" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">宝鐘マリン</span>
+                    <span class="name-en">marine</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="07-30" title="誕生日">🎂 07-30</time>
+                  <time datetime="2019-08-11" title="デビュー日">📢 2019-08-11</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--coco-color, var(--color-main));" onclick="openMemberSpotlight('coco')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/coco.jpg" alt="桐生ココ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">桐生ココ</span>
+                    <span class="name-en">coco</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="06-17" title="誕生日">🎂 06-17</time>
+                  <time datetime="2019-12-28" title="デビュー日">📢 2019-12-28</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--kanata-color, var(--color-main));" onclick="openMemberSpotlight('kanata')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/kanata.jpg" alt="天音かなた" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">天音かなた</span>
+                    <span class="name-en">kanata</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="04-22" title="誕生日">🎂 04-22</time>
+                  <time datetime="2019-12-27" title="デビュー日">📢 2019-12-27</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--watame-color, var(--color-main));" onclick="openMemberSpotlight('watame')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/watame.jpg" alt="角巻わため" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">角巻わため</span>
+                    <span class="name-en">watame</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="06-06" title="誕生日">🎂 06-06</time>
+                  <time datetime="2019-12-29" title="デビュー日">📢 2019-12-29</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--towa-color, var(--color-main));" onclick="openMemberSpotlight('towa')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/towa.jpg" alt="常闇トワ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">常闇トワ</span>
+                    <span class="name-en">towa</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="08-08" title="誕生日">🎂 08-08</time>
+                  <time datetime="2020-01-03" title="デビュー日">📢 2020-01-03</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--luna-color, var(--color-main));" onclick="openMemberSpotlight('luna')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/luna.jpg" alt="姫森ルーナ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">姫森ルーナ</span>
+                    <span class="name-en">luna</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="10-10" title="誕生日">🎂 10-10</time>
+                  <time datetime="2020-01-04" title="デビュー日">📢 2020-01-04</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--lamy-color, var(--color-main));" onclick="openMemberSpotlight('lamy')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/lamy.jpg" alt="雪花ラミィ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">雪花ラミィ</span>
+                    <span class="name-en">lamy</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="11-15" title="誕生日">🎂 11-15</time>
+                  <time datetime="2020-08-12" title="デビュー日">📢 2020-08-12</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--nene-color, var(--color-main));" onclick="openMemberSpotlight('nene')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/nene.jpg" alt="桃鈴ねね" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">桃鈴ねね</span>
+                    <span class="name-en">nene</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="03-02" title="誕生日">🎂 03-02</time>
+                  <time datetime="2020-08-13" title="デビュー日">📢 2020-08-13</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--botan-color, var(--color-main));" onclick="openMemberSpotlight('botan')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/botan.jpg" alt="獅白ぼたん" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">獅白ぼたん</span>
+                    <span class="name-en">botan</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="09-08" title="誕生日">🎂 09-08</time>
+                  <time datetime="2020-08-14" title="デビュー日">📢 2020-08-14</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--polka-color, var(--color-main));" onclick="openMemberSpotlight('polka')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/polka.jpg" alt="尾丸ポルカ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">尾丸ポルカ</span>
+                    <span class="name-en">polka</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="01-30" title="誕生日">🎂 01-30</time>
+                  <time datetime="2020-08-16" title="デビュー日">📢 2020-08-16</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--laplus-color, var(--color-main));" onclick="openMemberSpotlight('laplus')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/laplus.jpg" alt="ラプラス・ダークネス" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">ラプラス・ダークネス</span>
+                    <span class="name-en">laplus</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="05-25" title="誕生日">🎂 05-25</time>
+                  <time datetime="2021-11-26" title="デビュー日">📢 2021-11-26</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--lui-color, var(--color-main));" onclick="openMemberSpotlight('lui')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/lui.jpg" alt="鷹嶺ルイ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">鷹嶺ルイ</span>
+                    <span class="name-en">lui</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="06-11" title="誕生日">🎂 06-11</time>
+                  <time datetime="2021-11-27" title="デビュー日">📢 2021-11-27</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--koyori-color, var(--color-main));" onclick="openMemberSpotlight('koyori')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/koyori.jpg" alt="博衣こより" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">博衣こより</span>
+                    <span class="name-en">koyori</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="03-15" title="誕生日">🎂 03-15</time>
+                  <time datetime="2021-11-28" title="デビュー日">📢 2021-11-28</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--ai-koyori-color, var(--color-main));" onclick="openMemberSpotlight('ai-koyori')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/ai-koyori.jpg" alt="AIこより" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">AIこより</span>
+                    <span class="name-en">ai-koyori</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="09-25" title="誕生日">🎂 09-25</time>
+                  <time datetime="2023-09-25" title="デビュー日">📢 2023-09-25</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--chloe-color, var(--color-main));" onclick="openMemberSpotlight('chloe')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/chloe.jpg" alt="沙花叉クロヱ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">沙花叉クロヱ</span>
+                    <span class="name-en">chloe</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="05-18" title="誕生日">🎂 05-18</time>
+                  <time datetime="2021-11-29" title="デビュー日">📢 2021-11-29</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--iroha-color, var(--color-main));" onclick="openMemberSpotlight('iroha')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/iroha.jpg" alt="風真いろは" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">風真いろは</span>
+                    <span class="name-en">iroha</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="06-18" title="誕生日">🎂 06-18</time>
+                  <time datetime="2021-11-30" title="デビュー日">📢 2021-11-30</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--risu-color, var(--color-main));" onclick="openMemberSpotlight('risu')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/risu.jpg" alt="アユンダ・リス" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">アユンダ・リス</span>
+                    <span class="name-en">risu</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="01-15" title="誕生日">🎂 01-15</time>
+                  <time datetime="2020-04-10" title="デビュー日">📢 2020-04-10</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--moona-color, var(--color-main));" onclick="openMemberSpotlight('moona')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/moona.jpg" alt="ムーナ・ホシノヴァ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">ムーナ・ホシノヴァ</span>
+                    <span class="name-en">moona</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="02-15" title="誕生日">🎂 02-15</time>
+                  <time datetime="2020-04-11" title="デビュー日">📢 2020-04-11</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--iofi-color, var(--color-main));" onclick="openMemberSpotlight('iofi')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/iofi.jpg" alt="アイラニ・イオフィフティーン" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">アイラニ・イオフィフティーン</span>
+                    <span class="name-en">iofi</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="07-15" title="誕生日">🎂 07-15</time>
+                  <time datetime="2020-04-12" title="デビュー日">📢 2020-04-12</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--ollie-color, var(--color-main));" onclick="openMemberSpotlight('ollie')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/ollie.jpg" alt="クレイジー・オリー" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">クレイジー・オリー</span>
+                    <span class="name-en">ollie</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="10-13" title="誕生日">🎂 10-13</time>
+                  <time datetime="2020-12-04" title="デビュー日">📢 2020-12-04</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--anya-color, var(--color-main));" onclick="openMemberSpotlight('anya')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/anya.jpg" alt="アーニャ・メルフィッサ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">アーニャ・メルフィッサ</span>
+                    <span class="name-en">anya</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="03-12" title="誕生日">🎂 03-12</time>
+                  <time datetime="2020-12-05" title="デビュー日">📢 2020-12-05</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--reine-color, var(--color-main));" onclick="openMemberSpotlight('reine')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/reine.jpg" alt="パヴォリア・レイネ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">パヴォリア・レイネ</span>
+                    <span class="name-en">reine</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="09-09" title="誕生日">🎂 09-09</time>
+                  <time datetime="2020-12-06" title="デビュー日">📢 2020-12-06</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--zeta-color, var(--color-main));" onclick="openMemberSpotlight('zeta')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/zeta.jpg" alt="ベスティア・ゼータ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">ベスティア・ゼータ</span>
+                    <span class="name-en">zeta</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="11-07" title="誕生日">🎂 11-07</time>
+                  <time datetime="2022-03-25" title="デビュー日">📢 2022-03-25</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--kaela-color, var(--color-main));" onclick="openMemberSpotlight('kaela')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/kaela.jpg" alt="カエラ・コヴァルスキア" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">カエラ・コヴァルスキア</span>
+                    <span class="name-en">kaela</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="08-30" title="誕生日">🎂 08-30</time>
+                  <time datetime="2022-03-26" title="デビュー日">📢 2022-03-26</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--kobo-color, var(--color-main));" onclick="openMemberSpotlight('kobo')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/kobo.jpg" alt="こぼ・かなえる" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">こぼ・かなえる</span>
+                    <span class="name-en">kobo</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="12-12" title="誕生日">🎂 12-12</time>
+                  <time datetime="2022-03-27" title="デビュー日">📢 2022-03-27</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--calli-color, var(--color-main));" onclick="openMemberSpotlight('calli')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/calli.jpg" alt="森カリオペ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">森カリオペ</span>
+                    <span class="name-en">calli</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="04-04" title="誕生日">🎂 04-04</time>
+                  <time datetime="2020-09-12" title="デビュー日">📢 2020-09-12</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--kiara-color, var(--color-main));" onclick="openMemberSpotlight('kiara')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/kiara.jpg" alt="小鳥遊キアラ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">小鳥遊キアラ</span>
+                    <span class="name-en">kiara</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="07-06" title="誕生日">🎂 07-06</time>
+                  <time datetime="2020-09-12" title="デビュー日">📢 2020-09-12</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--ina-color, var(--color-main));" onclick="openMemberSpotlight('ina')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/ina.jpg" alt="一伊那尓栖" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">一伊那尓栖</span>
+                    <span class="name-en">ina</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="05-20" title="誕生日">🎂 05-20</time>
+                  <time datetime="2020-09-13" title="デビュー日">📢 2020-09-13</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--gura-color, var(--color-main));" onclick="openMemberSpotlight('gura')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/gura.jpg" alt="がうる・ぐら" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">がうる・ぐら</span>
+                    <span class="name-en">gura</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="06-20" title="誕生日">🎂 06-20</time>
+                  <time datetime="2020-09-13" title="デビュー日">📢 2020-09-13</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--amelia-color, var(--color-main));" onclick="openMemberSpotlight('amelia')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/amelia.jpg" alt="ワトソン・アメリア" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">ワトソン・アメリア</span>
+                    <span class="name-en">amelia</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="01-06" title="誕生日">🎂 01-06</time>
+                  <time datetime="2020-09-13" title="デビュー日">📢 2020-09-13</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--irys-color, var(--color-main));" onclick="openMemberSpotlight('irys')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/irys.jpg" alt="IRyS" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">IRyS</span>
+                    <span class="name-en">irys</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="03-07" title="誕生日">🎂 03-07</time>
+                  <time datetime="2021-07-11" title="デビュー日">📢 2021-07-11</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--kronii-color, var(--color-main));" onclick="openMemberSpotlight('kronii')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/kronii.jpg" alt="オーロ・クロニー" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">オーロ・クロニー</span>
+                    <span class="name-en">kronii</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="03-14" title="誕生日">🎂 03-14</time>
+                  <time datetime="2021-08-22" title="デビュー日">📢 2021-08-22</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--bae-color, var(--color-main));" onclick="openMemberSpotlight('bae')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/bae.jpg" alt="ハコス・ベールズ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">ハコス・ベールズ</span>
+                    <span class="name-en">bae</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="02-29" title="誕生日">🎂 02-29</time>
+                  <time datetime="2021-08-22" title="デビュー日">📢 2021-08-22</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--fauna-color, var(--color-main));" onclick="openMemberSpotlight('fauna')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/fauna.jpg" alt="セレス・ファウナ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">セレス・ファウナ</span>
+                    <span class="name-en">fauna</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="03-21" title="誕生日">🎂 03-21</time>
+                  <time datetime="2021-08-22" title="デビュー日">📢 2021-08-22</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--mumei-color, var(--color-main));" onclick="openMemberSpotlight('mumei')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/mumei.jpg" alt="七詩ムメイ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">七詩ムメイ</span>
+                    <span class="name-en">mumei</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="08-04" title="誕生日">🎂 08-04</time>
+                  <time datetime="2021-08-22" title="デビュー日">📢 2021-08-22</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--sana-color, var(--color-main));" onclick="openMemberSpotlight('sana')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/sana.jpg" alt="九十九佐命" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">九十九佐命</span>
+                    <span class="name-en">sana</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="06-10" title="誕生日">🎂 06-10</time>
+                  <time datetime="2021-08-22" title="デビュー日">📢 2021-08-22</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--shiori-color, var(--color-main));" onclick="openMemberSpotlight('shiori')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/shiori.jpg" alt="シオリ・ノヴェラ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">シオリ・ノヴェラ</span>
+                    <span class="name-en">shiori</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="05-02" title="誕生日">🎂 05-02</time>
+                  <time datetime="2023-07-30" title="デビュー日">📢 2023-07-30</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--bijou-color, var(--color-main));" onclick="openMemberSpotlight('bijou')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/bijou.jpg" alt="古石ビジュー" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">古石ビジュー</span>
+                    <span class="name-en">bijou</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="04-14" title="誕生日">🎂 04-14</time>
+                  <time datetime="2023-07-30" title="デビュー日">📢 2023-07-30</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--nerissa-color, var(--color-main));" onclick="openMemberSpotlight('nerissa')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/nerissa.jpg" alt="ネリッサ・レイヴンクロフト" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">ネリッサ・レイヴンクロフト</span>
+                    <span class="name-en">nerissa</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="11-21" title="誕生日">🎂 11-21</time>
+                  <time datetime="2023-07-31" title="デビュー日">📢 2023-07-31</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--fuwawa-color, var(--color-main));" onclick="openMemberSpotlight('fuwawa')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/fuwawa.jpg" alt="フワワ・アビスガード" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">フワワ・アビスガード</span>
+                    <span class="name-en">fuwawa</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="02-01" title="誕生日">🎂 02-01</time>
+                  <time datetime="2023-07-31" title="デビュー日">📢 2023-07-31</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--mococo-color, var(--color-main));" onclick="openMemberSpotlight('mococo')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/mococo.jpg" alt="モココ・アビスガード" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">モココ・アビスガード</span>
+                    <span class="name-en">mococo</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="02-02" title="誕生日">🎂 02-02</time>
+                  <time datetime="2023-07-31" title="デビュー日">📢 2023-07-31</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--elizabeth-color, var(--color-main));" onclick="openMemberSpotlight('elizabeth')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/elizabeth.jpg" alt="エリザベス・ローズ・ブラッドフレイム" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">エリザベス・ローズ・ブラッドフレイム</span>
+                    <span class="name-en">elizabeth</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="04-25" title="誕生日">🎂 04-25</time>
+                  <time datetime="2024-06-21" title="デビュー日">📢 2024-06-21</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--gigi-color, var(--color-main));" onclick="openMemberSpotlight('gigi')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/gigi.jpg" alt="ジジ・ムリン" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">ジジ・ムリン</span>
+                    <span class="name-en">gigi</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="10-18" title="誕生日">🎂 10-18</time>
+                  <time datetime="2024-06-21" title="デビュー日">📢 2024-06-21</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--cecilia-color, var(--color-main));" onclick="openMemberSpotlight('cecilia')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/cecilia.jpg" alt="セシリア・イマーグリーン" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">セシリア・イマーグリーン</span>
+                    <span class="name-en">cecilia</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="11-11" title="誕生日">🎂 11-11</time>
+                  <time datetime="2024-06-22" title="デビュー日">📢 2024-06-22</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--raora-color, var(--color-main));" onclick="openMemberSpotlight('raora')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/raora.jpg" alt="ラオーラ・パンテーラ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">ラオーラ・パンテーラ</span>
+                    <span class="name-en">raora</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="05-11" title="誕生日">🎂 05-11</time>
+                  <time datetime="2024-06-22" title="デビュー日">📢 2024-06-22</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--ao-color, var(--color-main));" onclick="openMemberSpotlight('ao')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/ao.jpg" alt="火威青" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">火威青</span>
+                    <span class="name-en">ao</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="02-27" title="誕生日">🎂 02-27</time>
+                  <time datetime="2023-09-09" title="デビュー日">📢 2023-09-09</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--kanade-color, var(--color-main));" onclick="openMemberSpotlight('kanade')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/kanade.jpg" alt="音乃瀬奏" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">音乃瀬奏</span>
+                    <span class="name-en">kanade</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="04-20" title="誕生日">🎂 04-20</time>
+                  <time datetime="2023-09-09" title="デビュー日">📢 2023-09-09</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--ririka-color, var(--color-main));" onclick="openMemberSpotlight('ririka')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/ririka.jpg" alt="一条莉々華" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">一条莉々華</span>
+                    <span class="name-en">ririka</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="05-12" title="誕生日">🎂 05-12</time>
+                  <time datetime="2023-09-09" title="デビュー日">📢 2023-09-09</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--raden-color, var(--color-main));" onclick="openMemberSpotlight('raden')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/raden.jpg" alt="儒烏風亭らでん" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">儒烏風亭らでん</span>
+                    <span class="name-en">raden</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="02-04" title="誕生日">🎂 02-04</time>
+                  <time datetime="2023-09-10" title="デビュー日">📢 2023-09-10</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--hajime-color, var(--color-main));" onclick="openMemberSpotlight('hajime')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/hajime.jpg" alt="轟はじめ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">轟はじめ</span>
+                    <span class="name-en">hajime</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="06-07" title="誕生日">🎂 06-07</time>
+                  <time datetime="2023-09-10" title="デビュー日">📢 2023-09-10</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--riona-color, var(--color-main));" onclick="openMemberSpotlight('riona')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/riona.jpg" alt="響咲リオナ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">響咲リオナ</span>
+                    <span class="name-en">riona</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="05-29" title="誕生日">🎂 05-29</time>
+                  <time datetime="2024-11-09" title="デビュー日">📢 2024-11-09</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--niko-color, var(--color-main));" onclick="openMemberSpotlight('niko')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/niko.jpg" alt="虎金妃笑虎" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">虎金妃笑虎</span>
+                    <span class="name-en">niko</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="07-25" title="誕生日">🎂 07-25</time>
+                  <time datetime="2024-11-09" title="デビュー日">📢 2024-11-09</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--su-color, var(--color-main));" onclick="openMemberSpotlight('su')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/su.jpg" alt="水宮枢" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">水宮枢</span>
+                    <span class="name-en">su</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="06-16" title="誕生日">🎂 06-16</time>
+                  <time datetime="2024-11-09" title="デビュー日">📢 2024-11-09</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--chihaya-color, var(--color-main));" onclick="openMemberSpotlight('chihaya')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/chihaya.jpg" alt="輪堂千速" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">輪堂千速</span>
+                    <span class="name-en">chihaya</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="07-08" title="誕生日">🎂 07-08</time>
+                  <time datetime="2024-11-09" title="デビュー日">📢 2024-11-09</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--vivi-color, var(--color-main));" onclick="openMemberSpotlight('vivi')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/vivi.jpg" alt="綺々羅々ヴィヴィ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">綺々羅々ヴィヴィ</span>
+                    <span class="name-en">vivi</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="08-27" title="誕生日">🎂 08-27</time>
+                  <time datetime="2024-11-09" title="デビュー日">📢 2024-11-09</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--mela-color, var(--color-main));" onclick="openMemberSpotlight('mela')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/mela.jpg" alt="熱千めら" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">熱千めら</span>
+                    <span class="name-en">mela</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="04-16" title="誕生日">🎂 04-16</time>
+                  <time datetime="2026-09-24" title="デビュー日">📢 2026-09-24</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--sopia-color, var(--color-main));" onclick="openMemberSpotlight('sopia')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/sopia.jpg" alt="宙科そぴあ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">宙科そぴあ</span>
+                    <span class="name-en">sopia</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="06-13" title="誕生日">🎂 06-13</time>
+                  <time datetime="2026-09-24" title="デビュー日">📢 2026-09-24</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--kyoko-color, var(--color-main));" onclick="openMemberSpotlight('kyoko')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/kyoko.jpg" alt="百灯キョーコ" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">百灯キョーコ</span>
+                    <span class="name-en">kyoko</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="05-08" title="誕生日">🎂 05-08</time>
+                  <time datetime="2026-09-25" title="デビュー日">📢 2026-09-25</time>
+                </div>
+              </article>
+              <article class="member-card" style="--photo-color: var(--tsuzuri-color, var(--color-main));" onclick="openMemberSpotlight('tsuzuri')">
+                <div class="member-card-img">
+                  <div class="member-avatar"><img class="avatar-img" src="images/avatars/tsuzuri.jpg" alt="鈴鳴つづり" loading="lazy" width="240" height="240" /></div>
+                </div>
+                <div class="member-card-body">
+                  <div class="photo-card-name">
+                    <span class="name-jp">鈴鳴つづり</span>
+                    <span class="name-en">tsuzuri</span>
+                  </div>
+                </div>
+                <div class="member-card-dates">
+                  <time datetime="06-28" title="誕生日">🎂 06-28</time>
+                  <time datetime="2026-09-25" title="デビュー日">📢 2026-09-25</time>
+                </div>
+              </article>
+              <!-- static-members:end -->
+            </div>
           </div>
 
           <!-- 成員個人專屬畫面 (點選成員後此處全螢幕展示) -->
@@ -264,6 +1501,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/swiper@14/swiper-bundle.min.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

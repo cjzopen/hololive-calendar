@@ -4,7 +4,6 @@ const sidebarOverlay = document.getElementById("sidebar-overlay");
 const menuToggle = document.getElementById("menu-toggle");
 const navItems = document.querySelectorAll(".nav-item");
 const pageViews = document.querySelectorAll(".page-view");
-const quickTodayBtn = document.getElementById("quick-today-btn");
 const sidebarMemberStatus = document.getElementById("sidebar-member-status");
 
 // Calendar Elements
@@ -52,10 +51,11 @@ let activeMemberFilter = null; // 当選されたメンバーのslug
 
 const weekdayNames = ["日", "月", "火", "水", "木", "金", "土"];
 
-// Member Avatars (static files in images/avatars/, updated via tools/fetch-avatars.mjs)
+// Member Avatars (static files in images/avatars/; youtube → tools/fetch-avatars.mjs, avatar: "manual" → hand-made)
 function getMemberAvatarUrl(character) {
   const slug = Array.isArray(character) ? character[0] : character;
-  if (!slug || !fixedEvents[slug]?.youtube) return null;
+  const member = fixedEvents[slug];
+  if (!member || !(member.youtube || member.avatar)) return null;
   return `images/avatars/${slug}.jpg`;
 }
 
@@ -216,15 +216,10 @@ function setupEventListeners() {
     sidebarOverlay.addEventListener("click", closeMobileSidebar);
   }
 
-  // Quick Today Button
-  if (quickTodayBtn) {
-    quickTodayBtn.addEventListener("click", () => {
-      currentDate = new Date();
-      selectedDate = new Date();
-      switchView("home");
-      closeMobileSidebar();
-    });
-  }
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && sidebar.classList.contains("open")) closeMobileSidebar();
+  });
+
 
   // Calendar Controls
   if (prevMonthBtn) {
@@ -387,7 +382,7 @@ function updateSidebarMemberStatus() {
   const member = fixedEvents[activeMemberFilter];
   sidebarMemberStatus.innerHTML = `
     <div class="status-title">現在のフォーカス</div>
-    <div>${member.emoji || "✨"} <strong>${member.name}</strong></div>
+    <div>${member.emoji ? `${member.emoji} ` : ""}<strong>${member.name}</strong></div>
     <button type="button" class="btn-clear-member" onclick="clearMemberFocus()">✕ フォーカス解除</button>
   `;
 }
@@ -420,19 +415,23 @@ function renderHomeView() {
     `;
   }
 
-  // Today Events
-  const todayEvents = getEventsForDate(today);
+  // Today: nearest events within 72 hours (today / tomorrow / day after)
+  const featuredEvents = getFeaturedEvents();
+  const featuredDiff = featuredEvents[0]?.diffDays;
 
   if (todaySummaryLabel) {
-    if (todayEvents.length > 0) {
-      todaySummaryLabel.textContent = `きょうは ${todayEvents.length} 件のイベントがあります！`;
+    if (featuredEvents.length === 0) {
+      todaySummaryLabel.textContent = "72時間以内の記念日・公式大型イベントはありません";
+    } else if (featuredDiff === 0) {
+      todaySummaryLabel.textContent = `きょうは ${featuredEvents.length} 件のイベントがあります！`;
     } else {
-      todaySummaryLabel.textContent = "きょうの固定記念日・公式大型イベントはありません";
+      const dayWord = featuredDiff === 1 ? "あした" : "あさって";
+      todaySummaryLabel.textContent = `${dayWord}（${formatDisplayDate(featuredEvents[0].dateObj)}）に ${featuredEvents.length} 件のイベントがあります！`;
     }
   }
 
   if (todayEventsContainer) {
-    if (todayEvents.length === 0) {
+    if (featuredEvents.length === 0) {
       todayEventsContainer.innerHTML = `
         <div class="today-empty-card">
           <div class="empty-icon">🍵</div>
@@ -444,25 +443,14 @@ function renderHomeView() {
         </div>
       `;
     } else {
-      todayEventsContainer.innerHTML = todayEvents.map(ev => renderPhotoCardHtml({
-        character: ev.character,
-        name: Array.isArray(ev.name) ? ev.name.join(" / ") : ev.name,
-        emoji: ev.emoji,
-        event: ev.event,
-        type: ev.type,
-        dateObj: today,
-        tagLabel: "本日！",
-        tagClass: "is-today"
-      })).join("");
+      renderTodayStage(featuredEvents);
     }
   }
 
   renderUpcomingSection();
 }
 
-function renderUpcomingSection() {
-  if (!upcomingEventsContainer) return;
-
+function buildUpcomingList() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -536,6 +524,226 @@ function renderUpcomingSection() {
 
   // Sort by date ascending
   upcomingList.sort((a, b) => a.diffDays - b.diffDays);
+  return upcomingList;
+}
+
+// Events within 72 hours; only the nearest day is featured in TODAY
+function getFeaturedEvents() {
+  const list = buildUpcomingList().filter(item => item.diffDays <= 2);
+  if (list.length === 0) return [];
+  return list.filter(item => item.diffDays === list[0].diffDays);
+}
+
+// ----------------------------------------------------
+// TODAY Stage (featured events with party effects)
+// ----------------------------------------------------
+let todaySwiper = null;
+let tomorrowTimerId = null;
+
+const stageKickers = {
+  birthday: ["HAPPY BIRTHDAY!", "BIRTHDAY EVE", "BIRTHDAY SOON"],
+  debut: ["HAPPY ANNIVERSARY!", "ANNIVERSARY EVE", "ANNIVERSARY SOON"],
+  special: ["IT'S SHOWTIME!", "SHOWTIME EVE", "SHOWTIME SOON"]
+};
+
+function renderWaveTextHtml(text) {
+  return [...text].map((ch, i) => `<span style="--i: ${i};">${ch === " " ? "&nbsp;" : ch}</span>`).join("");
+}
+
+function renderStageDecoHtml(type) {
+  if (type === "birthday") {
+    return `
+      <span class="stage-party-hat" aria-hidden="true"><i class="hat-pom"></i></span>
+      <span class="stage-sticker" aria-hidden="true">🎂</span>
+    `;
+  }
+  if (type === "debut") {
+    return `<span class="stage-rosette" aria-hidden="true"><b>祝</b></span>`;
+  }
+  return `<span class="stage-sticker" aria-hidden="true">🎤</span>`;
+}
+
+function renderStageHtml(item) {
+  const slug = item.character;
+  const kicker = (stageKickers[item.type] || stageKickers.special)[Math.min(item.diffDays, 2)];
+  const countdown = item.diffDays === 0 ? "本日！" : getCountdownBadge(item.diffDays).label;
+  const oshiBubblesHtml = item.emoji
+    ? ["_a", "_b", "_c"].map(pos => `<span class="stage-bubble ${pos}" aria-hidden="true">${item.emoji}</span>`).join("")
+    : "";
+
+  return `
+    <article class="today-stage is-${item.type} is-day-${item.diffDays}" style="--stage-color: ${getMemberColorVar(slug)};">
+      <div class="stage-bg" aria-hidden="true"><span class="stage-rays"></span></div>
+      ${item.type === "special" ? `<span class="stage-spot _l" aria-hidden="true"></span><span class="stage-spot _r" aria-hidden="true"></span>` : ""}
+      <div class="stage-confetti" aria-hidden="true"></div>
+
+      <div class="stage-avatar-wrap" role="button" tabindex="0" title="クリックでお祝い！"
+           onclick="fireStageConfetti(this.closest('.today-stage'), true)"
+           onkeydown="if (event.key === 'Enter') fireStageConfetti(this.closest('.today-stage'), true)">
+        <span class="stage-ring" aria-hidden="true"></span>
+        ${renderMemberAvatarHtml(slug, item.emoji, "stage-avatar")}
+        ${renderStageDecoHtml(item.type)}
+        ${oshiBubblesHtml}
+      </div>
+
+      <div class="stage-info">
+        <p class="stage-kicker">${renderWaveTextHtml(kicker)}</p>
+        <span class="type-label is-${item.type}">${getTypeLabel(item.type)}</span>
+        <h4 class="stage-name">
+          <span class="name-jp">${item.name || "hololive"}</span>
+          ${slug ? `<span class="name-en">${slug}</span>` : ""}
+        </h4>
+        <p class="stage-event">${item.event}</p>
+        <div class="stage-meta">
+          <time class="stage-date">${formatDisplayDate(item.dateObj)}</time>
+          <span class="stage-countdown">${countdown}</span>
+          ${renderHeartButtonHtml(slug)}
+        </div>
+        ${slug && fixedEvents[slug] ? `<button type="button" class="btn-mint stage-go-btn" onclick="goToMemberOrCalendar('${slug}')">メンバーページへ →</button>` : ""}
+      </div>
+    </article>
+  `;
+}
+
+function renderTomorrowTeaserHtml() {
+  return `
+    <aside class="tomorrow-teaser">
+      <figure class="teaser-polaroid">
+        <span class="teaser-tape" aria-hidden="true"></span>
+        <img class="teaser-gif" src="images/deco/tomorrow.gif" alt="あしたが待ちきれない！" loading="lazy" width="640" height="640" />
+        <figcaption class="teaser-caption">あしたが待ちきれない〜！</figcaption>
+      </figure>
+      <div class="teaser-timer-box">
+        <span class="teaser-timer-label">COUNTDOWN</span>
+        <span class="teaser-timer" id="tomorrow-timer">--:--:--</span>
+      </div>
+    </aside>
+  `;
+}
+
+function renderTodayStage(featuredEvents) {
+  const stagesHtml = featuredEvents.map(renderStageHtml);
+  const isTomorrow = featuredEvents[0].diffDays === 1;
+
+  const stageArea = stagesHtml.length > 1
+    ? `
+      <div class="today-stage-slider">
+        <div class="today-swiper swiper">
+          <div class="swiper-wrapper">
+            ${stagesHtml.map(html => `<div class="swiper-slide">${html}</div>`).join("")}
+          </div>
+          <div class="swiper-pagination"></div>
+        </div>
+        <button type="button" class="today-swiper-prev" aria-label="前へ">←</button>
+        <button type="button" class="today-swiper-next" aria-label="次へ">→</button>
+      </div>
+    `
+    : stagesHtml[0];
+
+  todayEventsContainer.innerHTML = `
+    <div class="today-featured${isTomorrow ? " is-tomorrow" : ""}">
+      ${isTomorrow ? renderTomorrowTeaserHtml() : ""}
+      ${stageArea}
+    </div>
+  `;
+
+  initTodaySwiper();
+  startTomorrowTimer(isTomorrow);
+  const firstStage = todayEventsContainer.querySelector(".today-stage.is-birthday.is-day-0");
+  fireStageConfetti(firstStage);
+}
+
+// Confetti cannon from both bottom corners (birthday today, or on avatar click)
+function fireStageConfetti(stage, isManual = false) {
+  if (!stage) return;
+  if (!isManual && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const layer = stage.querySelector(".stage-confetti");
+  if (!layer) return;
+
+  const colors = ["var(--stage-color)", "var(--color-main)", "var(--color-sub)", "#FFD43B", "#42B9EF", "#B388FF"];
+  const pieces = [];
+  for (let i = 0; i < 70; i++) {
+    const fromLeft = i % 2 === 0;
+    const piece = document.createElement("i");
+    piece.className = i % 3 === 0 ? "confetti-piece _streamer" : "confetti-piece";
+    piece.style.setProperty("--c", colors[i % colors.length]);
+    piece.style.setProperty("--x0", fromLeft ? "3%" : "97%");
+    piece.style.setProperty("--dx", `${(fromLeft ? 1 : -1) * (60 + Math.random() * 380)}px`);
+    piece.style.setProperty("--dy", `${-(160 + Math.random() * 240)}px`);
+    piece.style.setProperty("--rot", `${Math.round(Math.random() * 1080 - 540)}deg`);
+    piece.style.setProperty("--dur", `${1.8 + Math.random() * 1.2}s`);
+    piece.style.setProperty("--delay", `${Math.random() * .25}s`);
+    pieces.push(piece);
+  }
+  layer.append(...pieces);
+  stage.classList.remove("is-popping");
+  void stage.offsetWidth;
+  stage.classList.add("is-popping");
+  setTimeout(() => pieces.forEach(p => p.remove()), 3500);
+}
+
+function startTomorrowTimer(isActive) {
+  clearInterval(tomorrowTimerId);
+  tomorrowTimerId = null;
+  if (!isActive) return;
+
+  const tick = () => {
+    const timerEl = document.getElementById("tomorrow-timer");
+    if (!timerEl) return;
+    const now = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const remain = Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
+    if (remain === 0) {
+      clearInterval(tomorrowTimerId);
+      renderHomeView();
+      return;
+    }
+    const h = String(Math.floor(remain / 3600)).padStart(2, "0");
+    const m = String(Math.floor(remain % 3600 / 60)).padStart(2, "0");
+    const sec = String(remain % 60).padStart(2, "0");
+    timerEl.textContent = `${h}:${m}:${sec}`;
+  };
+  tick();
+  tomorrowTimerId = setInterval(tick, 1000);
+}
+
+function initTodaySwiper() {
+  todaySwiper?.destroy(true, true);
+  todaySwiper = null;
+  if (typeof Swiper === "undefined" || !document.querySelector(".today-swiper")) return;
+
+  todaySwiper = new Swiper(".today-swiper", {
+    slidesPerView: 1,
+    spaceBetween: 24,
+    grabCursor: true,
+    watchOverflow: true,
+    autoplay: {
+      delay: 6000,
+      disableOnInteraction: true,
+      pauseOnMouseEnter: true
+    },
+    pagination: {
+      el: ".today-swiper .swiper-pagination",
+      clickable: true
+    },
+    navigation: {
+      prevEl: ".today-swiper-prev",
+      nextEl: ".today-swiper-next"
+    },
+    on: {
+      slideChangeTransitionEnd(swiper) {
+        const stage = swiper.slides[swiper.activeIndex]?.querySelector(".today-stage.is-birthday.is-day-0");
+        fireStageConfetti(stage);
+      }
+    }
+  });
+}
+
+function renderUpcomingSection() {
+  if (!upcomingEventsContainer) return;
+
+  const featuredEvents = getFeaturedEvents();
+  const upcomingList = buildUpcomingList().filter(item => !featuredEvents.some(f => f.type === item.type && f.character === item.character && f.dateStr === item.dateStr && f.event === item.event));
 
   // Filter
   const filteredList = upcomingList.filter(item => {
@@ -578,8 +786,9 @@ function getCountdownBadge(diffDays) {
   }
 }
 
-function getNextOccurrence(monthDayStr, fromDate) {
-  const [m, d] = monthDayStr.split("-").map(Number);
+// Accepts "MM-DD" (birthday) or "YYYY-MM-DD" (debut)
+function getNextOccurrence(dateStr, fromDate) {
+  const [m, d] = dateStr.slice(-5).split("-").map(Number);
   const year = fromDate.getFullYear();
   let target = new Date(year, m - 1, d);
   target.setHours(0, 0, 0, 0);
@@ -852,7 +1061,7 @@ function getEventsForDate(date) {
     }
 
     if (info.debut) {
-      const [dm, dd] = info.debut.split("-").map(Number);
+      const [dm, dd] = info.debut.slice(-5).split("-").map(Number);
       if (dm === m && dd === d) {
         matches.push({
           type: "debut",
@@ -943,8 +1152,8 @@ function renderMembersList() {
           ${renderHeartButtonHtml(member.slug)}
         </div>
         <div class="member-card-dates">
-          <span>🎂 ${member.birthday || "—"}</span>
-          <span>📢 ${member.debut || "—"}</span>
+          <time datetime="${member.birthday || ""}">🎂 ${member.birthday || "—"}</time>
+          <time datetime="${member.debut || ""}">📢 ${member.debut || "—"}</time>
         </div>
       </article>
     `;
@@ -1028,9 +1237,10 @@ function renderMemberSpotlightContent(slug) {
   let debutCountdownText = "未登録";
   if (member.debut) {
     const dOccurrence = getNextOccurrence(member.debut, today);
+    const years = dOccurrence.targetDate.getFullYear() - Number(member.debut.slice(0, 4));
     debutCountdownText = dOccurrence.diffDays === 0
-      ? "📢 きょうがデビュー記念日です！"
-      : `次のデビュー記念日まで あと ${dOccurrence.diffDays} 日`;
+      ? `📢 きょうがデビュー ${years} 周年です！`
+      : `${years} 周年まで あと ${dOccurrence.diffDays} 日`;
   }
 
   if (memberSpotlightCard) {
@@ -1041,7 +1251,7 @@ function renderMemberSpotlightContent(slug) {
           ${renderMemberAvatarHtml(slug, member.emoji)}
         </div>
         <div class="member-hero-title-box">
-          <span class="member-hero-oshi">${member.emoji || "✨"}</span>
+          ${member.emoji ? `<span class="member-hero-oshi">${member.emoji}</span>` : ""}
           <h2 class="member-hero-name">${member.name}</h2>
           <div class="member-hero-sub">${slug}</div>
           ${renderHeartButtonHtml(slug)}
@@ -1050,12 +1260,12 @@ function renderMemberSpotlightContent(slug) {
       <div class="member-countdown-grid">
         <div class="member-date-card">
           <span class="date-card-label">🎂 誕生日</span>
-          <div class="date-card-date">${member.birthday || "—"}</div>
+          <time class="date-card-date" datetime="${member.birthday || ""}">${member.birthday || "—"}</time>
           <div class="date-card-countdown">${birthdayCountdownText}</div>
         </div>
         <div class="member-date-card">
           <span class="date-card-label">📢 デビュー記念日</span>
-          <div class="date-card-date">${member.debut || "—"}</div>
+          <time class="date-card-date" datetime="${member.debut || ""}">${member.debut || "—"}</time>
           <div class="date-card-countdown">${debutCountdownText}</div>
         </div>
       </div>
@@ -1083,11 +1293,21 @@ function renderMemberSpotlightContent(slug) {
         <div class="timeline-empty">出演イベントの登録はまだありません。</div>
       `;
     } else {
+      const todayStr = formatDateString(today);
       memberEventsTimeline.innerHTML = memberEvents.map(ev => {
+        const isPast = ev.date < todayStr;
+        let statusHtml = `<span class="event-status is-past">終了</span>`;
+        if (!isPast) {
+          const [y, m, d] = ev.date.split("-").map(Number);
+          const diffDays = Math.round((new Date(y, m - 1, d).getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          const badge = getCountdownBadge(diffDays);
+          statusHtml = `<span class="event-status ${badge.className}">${badge.label}</span>`;
+        }
         return `
-          <div class="timeline-event-item">
+          <div class="timeline-event-item${isPast ? " is-past" : ""}">
             <time class="event-date-tag">${ev.date.replaceAll("-", ".")}</time>
             <div class="event-title-text">${ev.event}</div>
+            ${statusHtml}
           </div>
         `;
       }).join("");
