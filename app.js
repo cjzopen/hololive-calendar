@@ -12,8 +12,7 @@ const monthLabel = document.getElementById("month-label");
 const prevMonthBtn = document.getElementById("prev-month");
 const nextMonthBtn = document.getElementById("next-month");
 const todayBtn = document.getElementById("today-btn");
-const searchInput = document.getElementById("search-input");
-const searchDatalist = document.getElementById("search-datalist");
+const memberSelect = document.getElementById("member-select");
 const filterCheckboxes = document.querySelectorAll(".filter-checkbox");
 const panelDateTitle = document.getElementById("panel-date-title");
 const panelEventsList = document.getElementById("panel-events-list");
@@ -50,6 +49,13 @@ let upcomingFilter = "all";
 let activeMemberFilter = null; // 当選されたメンバーのslug
 
 const weekdayNames = ["日", "月", "火", "水", "木", "金", "土"];
+
+// UI 圖示：Lucide placeholder，由 icons.js 換成 <svg>
+const typeIcons = { birthday: "cake", debut: "megaphone", special: "sparkles" };
+
+function iconHtml(name, extraClass = "") {
+  return `<i class="icon ${extraClass}" data-lucide="${name}"></i>`;
+}
 
 // Member Avatars (static files in images/avatars/; youtube → tools/fetch-avatars.mjs, avatar: "manual" → hand-made)
 function getMemberAvatarUrl(character) {
@@ -112,13 +118,13 @@ function renderPhotoCardHtml({ character, name, emoji, event, type, dateObj, tag
   const slug = Array.isArray(character) ? character[0] : character;
   const charColor = getMemberColorVar(slug);
   return `
-    <article class="photo-card" style="--photo-color: ${charColor};" onclick="goToMemberOrCalendar('${slug || ""}')">
+    <article class="photo-card" data-member="${slug || ""}" style="--photo-color: ${charColor};" onclick="goToMemberOrCalendar('${slug || ""}')">
       <span class="photo-card-kira _rt" aria-hidden="true">✦</span>
       <span class="photo-card-kira _lb" aria-hidden="true">✦</span>
       <div class="photo-card-img">
         ${renderMemberAvatarHtml(slug, emoji)}
         <div class="photo-deco-hanko ${tagClass}">
-          <span class="hanko-text">${tagLabel}</span>
+          <span class="hanko-text">${formatHankoLabel(tagLabel)}</span>
         </div>
       </div>
       <div class="photo-card-body">
@@ -129,7 +135,7 @@ function renderPhotoCardHtml({ character, name, emoji, event, type, dateObj, tag
         </div>
         <p class="photo-card-event">${event}</p>
         <div class="photo-card-bottom">
-          <time class="photo-card-date">${formatDisplayDate(dateObj)}</time>
+          <time class="photo-card-date" datetime="${formatDateString(dateObj)}">${formatDisplayDate(dateObj)}${dateObj.getDay() === 1 ? `<img class="monday-face" src="images/deco/monday-face.png" alt="月曜日" title="月曜日…" width="24" height="24" loading="lazy" />` : ""}</time>
           ${renderHeartButtonHtml(slug)}
         </div>
       </div>
@@ -149,7 +155,7 @@ Promise.all([
 ]).then(([fixedData, specialData]) => {
   fixedEvents = fixedData;
   processSpecialEvents(specialData);
-  populateSearchDatalist();
+  populateMemberSelect();
   setupEventListeners();
   renderApp();
   restoreSavedState();
@@ -181,16 +187,67 @@ function processSpecialEvents(data) {
   }
 }
 
-// Populate Search Datalist
-function populateSearchDatalist() {
-  if (searchDatalist && fixedEvents) {
-    const names = Object.values(fixedEvents)
-      .map(item => item.name)
-      .filter(Boolean);
-    searchDatalist.innerHTML = names
-      .map(name => `<option value="${name}">`)
-      .join("");
+// Calendar Member Select（第一個選項「全員」＝解除篩選）
+function populateMemberSelect() {
+  if (!memberSelect || !fixedEvents) return;
+  const optionsHtml = Object.entries(fixedEvents).map(([slug, member]) => {
+    const avatarUrl = getMemberAvatarUrl(slug);
+    const avatarHtml = avatarUrl
+      ? `<img class="option-avatar" src="${avatarUrl}" alt="" loading="lazy" width="28" height="28" />`
+      : `<span class="option-avatar is-icon" aria-hidden="true">${iconHtml("user-round", "is-solo")}</span>`;
+    return `
+      <option class="member-option" value="${slug}" style="--option-color: ${getMemberColorVar(slug)};">
+        ${avatarHtml}
+        <span class="option-name">${escapeHtml(member.name)}</span>
+        ${member.emoji ? `<span class="option-oshi">${member.emoji}</span>` : ""}
+      </option>
+    `;
+  }).join("");
+  memberSelect.insertAdjacentHTML("beforeend", optionsHtml);
+  syncMemberSelect();
+}
+
+function syncMemberSelect() {
+  if (!memberSelect) return;
+  memberSelect.value = activeMemberFilter && fixedEvents[activeMemberFilter] ? activeMemberFilter : "";
+}
+
+// 該成員下一個即將到來的事件（生日、出道紀念日、特別活動）
+function getNextMemberEvent(slug) {
+  const member = fixedEvents[slug];
+  if (!member) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const candidates = ["birthday", "debut"]
+    .filter(type => member[type])
+    .map(type => getNextOccurrence(member[type], today));
+
+  for (const ev of allSpecialEventsList) {
+    const characters = Array.isArray(ev.character) ? ev.character : [ev.character];
+    if (!characters.includes(slug)) continue;
+    const [y, m, d] = ev.date.split("-").map(Number);
+    const targetDate = new Date(y, m - 1, d);
+    const diffDays = Math.round((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays >= 0) candidates.push({ targetDate, diffDays });
   }
+
+  return candidates.sort((a, b) => a.diffDays - b.diffDays)[0] || null;
+}
+
+function applyCalendarMemberFilter(slug) {
+  activeMemberFilter = slug;
+  localStorage.setItem("holokoyomi_active_member", slug);
+  updateSidebarMemberStatus();
+
+  // 跳到該成員下一個即將到來的事件所在月份
+  const nextEvent = getNextMemberEvent(slug);
+  if (nextEvent) {
+    currentDate = new Date(nextEvent.targetDate.getFullYear(), nextEvent.targetDate.getMonth(), 1);
+    selectedDate = new Date(nextEvent.targetDate);
+  }
+
+  executeTransition(() => renderCalendarView());
 }
 
 // Setup Event Listeners
@@ -244,8 +301,14 @@ function setupEventListeners() {
     };
   }
 
-  if (searchInput) {
-    searchInput.oninput = () => renderCalendarView();
+  if (memberSelect) {
+    memberSelect.onchange = () => {
+      if (memberSelect.value) {
+        applyCalendarMemberFilter(memberSelect.value);
+      } else {
+        clearMemberFocus();
+      }
+    };
   }
 
   filterCheckboxes.forEach(cb => {
@@ -311,6 +374,9 @@ function switchView(viewName) {
     pageViews.forEach(view => {
       view.classList.toggle("active", view.id === `view-${viewName}`);
     });
+
+    // 切換視圖時一律回到頁面頂端
+    window.scrollTo({ top: 0, behavior: "instant" });
 
     if (viewName === "calendar") {
       renderCalendarView();
@@ -434,11 +500,11 @@ function renderHomeView() {
     if (featuredEvents.length === 0) {
       todayEventsContainer.innerHTML = `
         <div class="today-empty-card">
-          <div class="empty-icon">🍵</div>
+          <div class="empty-icon">${iconHtml("coffee", "is-solo")}</div>
           <div class="empty-title">きょうの予定はありません</div>
           <p class="empty-desc">まったり推しの配信を楽しもう！カレンダーからこれからの予定もチェックできます。</p>
           <button type="button" class="btn-go-calendar" onclick="switchView('calendar')">
-            📅 カレンダーを見る
+            ${iconHtml("calendar-days")}カレンダーを見る
           </button>
         </div>
       `;
@@ -455,12 +521,15 @@ function buildUpcomingList() {
   today.setHours(0, 0, 0, 0);
 
   const upcomingList = [];
+  // 推し（愛心）成員不受天數與件數限制，一定會出現在 UPCOMING
+  const favorites = getFavorites();
 
   // 1. Process Fixed Events (Birthday & Debut)
   for (const [ch, info] of Object.entries(fixedEvents)) {
+    const isFav = favorites.includes(ch);
     if (info.birthday) {
       const occurrence = getNextOccurrence(info.birthday, today);
-      if (occurrence.diffDays >= 0 && occurrence.diffDays <= 50) {
+      if (occurrence.diffDays >= 0 && (occurrence.diffDays <= 50 || isFav)) {
         upcomingList.push({
           type: "birthday",
           character: ch,
@@ -469,14 +538,15 @@ function buildUpcomingList() {
           event: `${info.name} の誕生日`,
           dateObj: occurrence.targetDate,
           dateStr: formatDateString(occurrence.targetDate),
-          diffDays: occurrence.diffDays
+          diffDays: occurrence.diffDays,
+          isFavorite: isFav
         });
       }
     }
 
     if (info.debut) {
       const occurrence = getNextOccurrence(info.debut, today);
-      if (occurrence.diffDays >= 0 && occurrence.diffDays <= 50) {
+      if (occurrence.diffDays >= 0 && (occurrence.diffDays <= 50 || isFav)) {
         upcomingList.push({
           type: "debut",
           character: ch,
@@ -485,7 +555,8 @@ function buildUpcomingList() {
           event: `${info.name} デビュー記念日`,
           dateObj: occurrence.targetDate,
           dateStr: formatDateString(occurrence.targetDate),
-          diffDays: occurrence.diffDays
+          diffDays: occurrence.diffDays,
+          isFavorite: isFav
         });
       }
     }
@@ -500,7 +571,9 @@ function buildUpcomingList() {
     const diffTime = evDate.getTime() - today.getTime();
     const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays >= 0 && diffDays <= 60) {
+    const characters = Array.isArray(ev.character) ? ev.character : [ev.character];
+    const isFav = characters.some(c => favorites.includes(c));
+    if (diffDays >= 0 && (diffDays <= 60 || isFav)) {
       const firstChar = Array.isArray(ev.character) ? ev.character[0] : ev.character;
       const charName = Array.isArray(ev.character)
         ? ev.character.map(c => fixedEvents[c]?.name || c).join(" / ")
@@ -517,7 +590,8 @@ function buildUpcomingList() {
         event: ev.event,
         dateObj: evDate,
         dateStr: ev.date,
-        diffDays: diffDays
+        diffDays: diffDays,
+        isFavorite: isFav
       });
     }
   }
@@ -554,13 +628,13 @@ function renderStageDecoHtml(type) {
   if (type === "birthday") {
     return `
       <span class="stage-party-hat" aria-hidden="true"><i class="hat-pom"></i></span>
-      <span class="stage-sticker" aria-hidden="true">🎂</span>
+      <span class="stage-sticker" aria-hidden="true">${iconHtml("cake", "is-solo")}</span>
     `;
   }
   if (type === "debut") {
     return `<span class="stage-rosette" aria-hidden="true"><b>祝</b></span>`;
   }
-  return `<span class="stage-sticker" aria-hidden="true">🎤</span>`;
+  return `<span class="stage-sticker is-sub" aria-hidden="true">${iconHtml("mic-vocal", "is-solo")}</span>`;
 }
 
 function renderStageHtml(item) {
@@ -572,10 +646,12 @@ function renderStageHtml(item) {
     : "";
 
   return `
-    <article class="today-stage is-${item.type} is-day-${item.diffDays}" style="--stage-color: ${getMemberColorVar(slug)};">
+    <article class="today-stage is-${item.type} is-day-${item.diffDays}" data-member="${slug || ""}" style="--stage-color: ${getMemberColorVar(slug)};">
       <div class="stage-bg" aria-hidden="true"><span class="stage-rays"></span></div>
       ${item.type === "special" ? `<span class="stage-spot _l" aria-hidden="true"></span><span class="stage-spot _r" aria-hidden="true"></span>` : ""}
-      <div class="stage-confetti" aria-hidden="true"></div>
+      <div class="stage-confetti" aria-hidden="true">
+        ${item.type === "birthday" ? `<span class="stage-popper _l">${iconHtml("party-popper", "is-solo")}</span><span class="stage-popper _r">${iconHtml("party-popper", "is-solo")}</span>` : ""}
+      </div>
 
       <div class="stage-avatar-wrap" role="button" tabindex="0" title="クリックでお祝い！"
            onclick="fireStageConfetti(this.closest('.today-stage'), true)"
@@ -599,7 +675,6 @@ function renderStageHtml(item) {
           <span class="stage-countdown">${countdown}</span>
           ${renderHeartButtonHtml(slug)}
         </div>
-        ${slug && fixedEvents[slug] ? `<button type="button" class="btn-mint stage-go-btn" onclick="goToMemberOrCalendar('${slug}')">メンバーページへ →</button>` : ""}
       </div>
     </article>
   `;
@@ -754,7 +829,7 @@ function renderUpcomingSection() {
   if (filteredList.length === 0) {
     upcomingEventsContainer.innerHTML = `
       <div class="today-empty-card" style="grid-column: 1/-1;">
-        <div class="empty-icon">🌟</div>
+        <div class="empty-icon">${iconHtml("star", "is-solo")}</div>
         <div class="empty-title">該当する予定はありません</div>
         <p class="empty-desc">他のフィルターを選択してチェックしてみてください！</p>
       </div>
@@ -762,7 +837,7 @@ function renderUpcomingSection() {
     return;
   }
 
-  upcomingEventsContainer.innerHTML = filteredList.slice(0, 24).map(item => {
+  upcomingEventsContainer.innerHTML = filteredList.filter((item, i) => i < 24 || item.isFavorite).map(item => {
     const countdownInfo = getCountdownBadge(item.diffDays);
     return renderPhotoCardHtml({
       ...item,
@@ -770,6 +845,11 @@ function renderUpcomingSection() {
       tagClass: countdownInfo.className
     });
   }).join("");
+}
+
+// 印章文字：「あと N 日」在「あと」後換行
+function formatHankoLabel(label) {
+  return label.startsWith("あと") ? label.replace(/^あと\s*/, "あと<br>") : label;
 }
 
 function getCountdownBadge(diffDays) {
@@ -790,12 +870,16 @@ function getCountdownBadge(diffDays) {
 function getNextOccurrence(dateStr, fromDate) {
   const [m, d] = dateStr.slice(-5).split("-").map(Number);
   const year = fromDate.getFullYear();
-  let target = new Date(year, m - 1, d);
-  target.setHours(0, 0, 0, 0);
+  // 2/29 生まれは平年だと 2/28 扱い（月曆顯示一致）
+  const makeDate = y => {
+    const isLeap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+    return new Date(y, m - 1, m === 2 && d === 29 && !isLeap ? 28 : d);
+  };
+  let target = makeDate(year);
 
   const from = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
   if (target.getTime() < from.getTime()) {
-    target = new Date(year + 1, m - 1, d);
+    target = makeDate(year + 1);
   }
 
   const diffDays = Math.round((target.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
@@ -823,7 +907,6 @@ function renderCalendarView() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const today = new Date();
-  const searchKeyword = searchInput ? searchInput.value.trim() : "";
   const enabledTypes = Array.from(filterCheckboxes)
     .filter(cb => cb.checked)
     .map(cb => cb.value);
@@ -832,11 +915,14 @@ function renderCalendarView() {
     monthLabel.textContent = `${year}年 ${month + 1}月`;
   }
 
+  syncMemberSelect();
+
   // Update member filter banner
   if (calendarMemberFilterBanner) {
     if (activeMemberFilter && fixedEvents[activeMemberFilter]) {
       calendarMemberFilterBanner.classList.remove("u-hidden");
-      calendarMemberFilterDesc.textContent = `🌸 ${fixedEvents[activeMemberFilter].name} の予定を表示中`;
+      const filterMember = fixedEvents[activeMemberFilter];
+      calendarMemberFilterDesc.innerHTML = `${filterMember.emoji ? `${filterMember.emoji} ` : iconHtml("search")}${escapeHtml(filterMember.name)} の予定を表示中`;
     } else {
       calendarMemberFilterBanner.classList.add("u-hidden");
     }
@@ -886,24 +972,6 @@ function renderCalendarView() {
 
     const filteredEvents = dayEvents.filter(ev => enabledTypes.includes(ev.type));
 
-    // Search Keyword highlight
-    let isHighlight = false;
-    if (searchKeyword) {
-      for (const ev of filteredEvents) {
-        if (ev.name && ev.name.includes(searchKeyword)) {
-          isHighlight = true;
-          break;
-        }
-        if (ev.event && ev.event.includes(searchKeyword)) {
-          isHighlight = true;
-          break;
-        }
-      }
-    }
-    if (isHighlight) {
-      cell.classList.add("is-highlight");
-    }
-
     // Day Header
     const numberRow = document.createElement("div");
     numberRow.className = "day-number-row";
@@ -931,9 +999,8 @@ function renderCalendarView() {
       const chip = document.createElement("div");
       chip.className = "mini-event-chip";
       chip.style.setProperty("--chip-color", getMemberColorVar(ev.character));
-      const icon = ev.type === "birthday" ? "🎂" : ev.type === "debut" ? "📢" : (ev.emoji || "✨");
       const name = ev.name || ev.event || "";
-      chip.innerHTML = `<span class="chip-emoji">${icon}</span><span class="chip-text">${name}</span>`;
+      chip.innerHTML = `<span class="chip-emoji">${iconHtml(typeIcons[ev.type] || "sparkles", "is-solo")}</span><span class="chip-text">${name}</span>`;
       badgesWrapper.appendChild(chip);
     });
 
@@ -988,7 +1055,7 @@ function renderSelectedDayPanel(shouldAnimate = false) {
   if (events.length === 0) {
     panelEventsList.innerHTML = `
       <div class="panel-empty-state">
-        <div class="empty-tea-icon">☕</div>
+        <div class="empty-tea-icon">${iconHtml("coffee", "is-solo")}</div>
         <p>この日の予定はありません</p>
       </div>
     `;
@@ -1137,11 +1204,11 @@ function renderMembersList() {
     const countdownInfo = getMemberNextCountdown(member, today);
 
     return `
-      <article class="member-card" style="--photo-color: ${colorVar};" onclick="openMemberSpotlight('${member.slug}')">
+      <article class="member-card" data-member="${member.slug}" style="--photo-color: ${colorVar};" onclick="openMemberSpotlight('${member.slug}')">
         <div class="member-card-img">
           ${renderMemberAvatarHtml(member.slug, member.emoji)}
           <div class="photo-deco-hanko ${countdownInfo.className}">
-            <span class="hanko-text">${countdownInfo.label}</span>
+            <span class="hanko-text">${formatHankoLabel(countdownInfo.label)}</span>
           </div>
         </div>
         <div class="member-card-body">
@@ -1152,8 +1219,8 @@ function renderMembersList() {
           ${renderHeartButtonHtml(member.slug)}
         </div>
         <div class="member-card-dates">
-          <time datetime="${member.birthday || ""}">🎂 ${member.birthday || "—"}</time>
-          <time datetime="${member.debut || ""}">📢 ${member.debut || "—"}</time>
+          <time datetime="${member.birthday || ""}">${iconHtml("cake")}${member.birthday || "—"}</time>
+          <time datetime="${member.debut || ""}">${iconHtml("megaphone")}${member.debut || "—"}</time>
         </div>
       </article>
     `;
@@ -1230,7 +1297,7 @@ function renderMemberSpotlightContent(slug) {
   if (member.birthday) {
     const bOccurrence = getNextOccurrence(member.birthday, today);
     birthdayCountdownText = bOccurrence.diffDays === 0
-      ? "🎉 きょうがお誕生日です！"
+      ? `${iconHtml("party-popper")}きょうがお誕生日です！`
       : `次の誕生日まで あと ${bOccurrence.diffDays} 日`;
   }
 
@@ -1239,12 +1306,13 @@ function renderMemberSpotlightContent(slug) {
     const dOccurrence = getNextOccurrence(member.debut, today);
     const years = dOccurrence.targetDate.getFullYear() - Number(member.debut.slice(0, 4));
     debutCountdownText = dOccurrence.diffDays === 0
-      ? `📢 きょうがデビュー ${years} 周年です！`
+      ? `${iconHtml("megaphone")}きょうがデビュー ${years} 周年です！`
       : `${years} 周年まで あと ${dOccurrence.diffDays} 日`;
   }
 
   if (memberSpotlightCard) {
     memberSpotlightCard.style.setProperty("--member-color", colorVar);
+    memberSpotlightCard.dataset.member = slug;
     memberSpotlightCard.innerHTML = `
       <div class="member-hero-header">
         <div class="member-hero-photo">
@@ -1259,12 +1327,12 @@ function renderMemberSpotlightContent(slug) {
       </div>
       <div class="member-countdown-grid">
         <div class="member-date-card">
-          <span class="date-card-label">🎂 誕生日</span>
+          <span class="date-card-label">${iconHtml("cake")}誕生日</span>
           <time class="date-card-date" datetime="${member.birthday || ""}">${member.birthday || "—"}</time>
           <div class="date-card-countdown">${birthdayCountdownText}</div>
         </div>
         <div class="member-date-card">
-          <span class="date-card-label">📢 デビュー記念日</span>
+          <span class="date-card-label">${iconHtml("megaphone")}デビュー記念日</span>
           <time class="date-card-date" datetime="${member.debut || ""}">${member.debut || "—"}</time>
           <div class="date-card-countdown">${debutCountdownText}</div>
         </div>
@@ -1304,7 +1372,7 @@ function renderMemberSpotlightContent(slug) {
           statusHtml = `<span class="event-status ${badge.className}">${badge.label}</span>`;
         }
         return `
-          <div class="timeline-event-item${isPast ? " is-past" : ""}">
+          <div class="timeline-event-item${isPast ? " is-past" : ""}" data-member="${slug}">
             <time class="event-date-tag">${ev.date.replaceAll("-", ".")}</time>
             <div class="event-title-text">${ev.event}</div>
             ${statusHtml}
@@ -1428,6 +1496,9 @@ function burstMemberOshiMark(event, slug, emojiStr) {
       if (p.parentNode) p.parentNode.removeChild(p);
     }, 1100);
   }
+
+  // 推し的事件一定出現在 UPCOMING：立即重新整理
+  renderUpcomingSection();
 }
 
 function escapeHtml(str) {
