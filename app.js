@@ -114,7 +114,7 @@ function getTypeLabel(type) {
 }
 
 // Polaroid Photo Card (Today / Upcoming)
-function renderPhotoCardHtml({ character, name, emoji, event, type, dateObj, tagLabel, tagClass = "" }) {
+function renderPhotoCardHtml({ character, name, emoji, event, type, dateObj, tagLabel, tagClass = "", isGroup = false }) {
   const slug = Array.isArray(character) ? character[0] : character;
   const charColor = getMemberColorVar(slug);
   return `
@@ -136,7 +136,7 @@ function renderPhotoCardHtml({ character, name, emoji, event, type, dateObj, tag
         <p class="photo-card-event">${event}</p>
         <div class="photo-card-bottom">
           <time class="photo-card-date" datetime="${formatDateString(dateObj)}">${formatDisplayDate(dateObj)}${dateObj.getDay() === 1 ? `<img class="monday-face" src="images/deco/monday-face.png" alt="月曜日" title="月曜日…" width="24" height="24" loading="lazy" />` : ""}</time>
-          ${renderHeartButtonHtml(slug)}
+          ${isGroup ? "" : renderHeartButtonHtml(slug)}
         </div>
       </div>
     </article>
@@ -237,7 +237,7 @@ function getNextMemberEvent(slug) {
 
 function applyCalendarMemberFilter(slug) {
   activeMemberFilter = slug;
-  localStorage.setItem("holokoyomi_active_member", slug);
+  sessionStorage.setItem("holokoyomi_active_member", slug);
   updateSidebarMemberStatus();
 
   // 跳到該成員下一個即將到來的事件所在月份
@@ -340,7 +340,7 @@ function setupEventListeners() {
     memberBackBtn.onclick = () => {
       executeTransition(() => {
         activeMemberFilter = null;
-        localStorage.setItem("holokoyomi_active_member", "");
+        sessionStorage.setItem("holokoyomi_active_member", "");
         updateSidebarMemberStatus();
         memberProfileSubview.classList.add("u-hidden");
         membersListSubview.classList.remove("u-hidden");
@@ -364,7 +364,7 @@ function closeMobileSidebar() {
 function switchView(viewName) {
   if (activeView === viewName && viewName !== "members") return;
 
-  localStorage.setItem("holokoyomi_active_view", viewName);
+  sessionStorage.setItem("holokoyomi_active_view", viewName);
 
   executeTransition(() => {
     activeView = viewName;
@@ -403,8 +403,13 @@ function restoreSavedState() {
     } catch (e) {}
   }
 
-  const savedView = localStorage.getItem("holokoyomi_active_view") || "home";
-  const savedMember = localStorage.getItem("holokoyomi_active_member");
+  // 舊版把頁面狀態存在 localStorage，清掉避免殘留
+  localStorage.removeItem("holokoyomi_active_view");
+  localStorage.removeItem("holokoyomi_active_member");
+
+  // 頁面狀態只存在 sessionStorage：重新整理保留，關閉分頁後重開回到首頁
+  const savedView = sessionStorage.getItem("holokoyomi_active_view") || "home";
+  const savedMember = sessionStorage.getItem("holokoyomi_active_member");
 
   if (savedView === "members" && savedMember && fixedEvents[savedMember]) {
     openMemberSpotlight(savedMember);
@@ -419,7 +424,7 @@ function restoreSavedState() {
 
 function clearMemberFocus() {
   activeMemberFilter = null;
-  localStorage.setItem("holokoyomi_active_member", "");
+  sessionStorage.setItem("holokoyomi_active_member", "");
   updateSidebarMemberStatus();
   if (calendarMemberFilterBanner) {
     calendarMemberFilterBanner.classList.add("u-hidden");
@@ -591,7 +596,9 @@ function buildUpcomingList() {
         dateObj: evDate,
         dateStr: ev.date,
         diffDays: diffDays,
-        isFavorite: isFav
+        isFavorite: isFav,
+        // 多成員活動不放愛心（愛心只對應單一成員）
+        isGroup: characters.length > 1
       });
     }
   }
@@ -673,7 +680,7 @@ function renderStageHtml(item) {
         <div class="stage-meta">
           <time class="stage-date">${formatDisplayDate(item.dateObj)}</time>
           <span class="stage-countdown">${countdown}</span>
-          ${renderHeartButtonHtml(slug)}
+          ${item.isGroup ? "" : renderHeartButtonHtml(slug)}
         </div>
       </div>
     </article>
@@ -1261,8 +1268,8 @@ function openMemberSpotlight(slug) {
   if (!member) return;
 
   activeMemberFilter = slug;
-  localStorage.setItem("holokoyomi_active_view", "members");
-  localStorage.setItem("holokoyomi_active_member", slug);
+  sessionStorage.setItem("holokoyomi_active_view", "members");
+  sessionStorage.setItem("holokoyomi_active_member", slug);
   updateSidebarMemberStatus();
 
   executeTransition(() => {
@@ -1497,8 +1504,8 @@ function burstMemberOshiMark(event, slug, emojiStr) {
     }, 1100);
   }
 
-  // 推し的事件一定出現在 UPCOMING：立即重新整理
-  renderUpcomingSection();
+  // 推し的事件一定出現在 UPCOMING：等彈跳動畫播完再重新整理，避免按鈕被提早換掉
+  setTimeout(renderUpcomingSection, 300);
 }
 
 function escapeHtml(str) {
