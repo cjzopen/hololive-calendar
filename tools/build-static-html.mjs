@@ -33,7 +33,7 @@ function renderStaticCard(slug, member) {
   const birthday = member.birthday || "";
   const debut = member.debut || "";
   const avatarHtml = member.youtube || member.avatar
-    ? `<img class="avatar-img" src="images/avatars/${slug}.jpg" alt="${name}" loading="lazy" width="240" height="240" />`
+    ? `<img class="avatar-img" src="images/avatars/${slug}.webp" alt="${name}" loading="lazy" width="240" height="240" />`
     : `<span class="avatar-emoji-fallback">${escapeHtml(member.emoji || "✨")}</span>`;
 
   return [

@@ -1,4 +1,4 @@
-# 每月 15 日以 YouTube Data API 更新成員頭像（240px）
+# 每月 15 日以 YouTube Data API 更新成員頭像（240px WebP）
 # 需要在 GitHub repo 的 Settings → Secrets and variables → Actions 新增 YOUTUBE_API_KEY
 # 取得失敗的成員會保留原本的頭像；只有頭像有變更時才會 commit
 name: 更新成員頭像
@@ -28,10 +28,12 @@ jobs:
         with:
           node-version: 24
 
-      - name: 下載頭像
+      - name: 下載並壓縮頭像
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-        run: node tools/fetch-avatars.mjs
+        run: |
+          npm install --no-save sharp
+          node tools/fetch-avatars.mjs
 
       - name: Commit 變更的頭像
         run: |

@@ -62,7 +62,7 @@ function getMemberAvatarUrl(character) {
   const slug = Array.isArray(character) ? character[0] : character;
   const member = fixedEvents[slug];
   if (!member || !(member.youtube || member.avatar)) return null;
-  return `images/avatars/${slug}.jpg`;
+  return `images/avatars/${slug}.webp`;
 }
 
 function renderMemberAvatarHtml(character, emoji, extraClass = "") {

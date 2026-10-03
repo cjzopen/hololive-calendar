@@ -1,4 +1,4 @@
-// 以 YouTube Data API 取得成員頻道頭像（240px），存成 images/avatars/{slug}.jpg
+// 以 YouTube Data API 取得成員頻道頭像（240px），壓成 WebP（品質 75%）存成 images/avatars/{slug}.webp
 // 金鑰：環境變數 YOUTUBE_API_KEY（GitHub Actions 由 Secrets 注入），本機可寫在 .env
 // 用法：node tools/fetch-avatars.mjs            → 更新全部成員
 //       node tools/fetch-avatars.mjs sora miko  → 只更新指定成員
@@ -8,6 +8,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import sharp from "sharp";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = path.join(rootDir, "images", "avatars");
@@ -85,16 +86,19 @@ for (const [slug, member] of Object.entries(fixedEvents)) {
     continue;
   }
 
-  const outFile = path.join(outDir, `${slug}.jpg`);
+  const outFile = path.join(outDir, `${slug}.webp`);
   try {
     const { url, title } = await fetchAvatarUrl(member.youtube, apiKey);
-    const buffer = await downloadJpeg(url);
+    const jpegBuffer = await downloadJpeg(url);
+    const webpBuffer = await sharp(jpegBuffer)
+      .webp({ quality: 75 })
+      .toBuffer();
     const existing = await readExisting(outFile);
-    if (existing?.equals(buffer)) {
+    if (existing?.equals(webpBuffer)) {
       summary.unchanged++;
       continue;
     }
-    await writeFile(outFile, buffer);
+    await writeFile(outFile, webpBuffer);
     summary.updated++;
     console.log(`OK   ${slug} (@${member.youtube}) ${title}`);
   } catch (err) {
