@@ -1272,6 +1272,7 @@ input {
     object-fit: cover;
     border-radius: 6px;
     vertical-align: top;
+    background: url('images/deco/tomorrow-last.webp') center / cover no-repeat;
   }
 
   .teaser-caption {

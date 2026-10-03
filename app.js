@@ -135,7 +135,7 @@ function renderPhotoCardHtml({ character, name, emoji, event, type, dateObj, tag
         </div>
         <p class="photo-card-event">${event}</p>
         <div class="photo-card-bottom">
-          <time class="photo-card-date" datetime="${formatDateString(dateObj)}">${formatDisplayDate(dateObj)}${dateObj.getDay() === 1 ? `<img class="monday-face" src="images/deco/monday-face.png" alt="月曜日" title="月曜日…" width="24" height="24" loading="lazy" />` : ""}</time>
+          <time class="photo-card-date" datetime="${formatDateString(dateObj)}">${formatDisplayDate(dateObj)}${dateObj.getDay() === 1 ? `<img class="monday-face" src="images/deco/monday-face.webp" alt="月曜日" title="月曜日…" width="24" height="24" loading="lazy" />` : ""}</time>
           ${isGroup ? "" : renderHeartButtonHtml(slug)}
         </div>
       </div>
@@ -692,7 +692,7 @@ function renderTomorrowTeaserHtml() {
     <aside class="tomorrow-teaser">
       <figure class="teaser-polaroid">
         <span class="teaser-tape" aria-hidden="true"></span>
-        <img class="teaser-gif" src="images/deco/tomorrow.gif" alt="あしたが待ちきれない！" loading="lazy" width="640" height="640" />
+        <img class="teaser-gif" src="images/deco/tomorrow-last.webp" alt="あしたが待ちきれない！" width="360" height="360" data-anim-src="images/deco/tomorrow.webp" />
         <figcaption class="teaser-caption">あしたが待ちきれない〜！</figcaption>
       </figure>
       <div class="teaser-timer-box">
@@ -701,6 +701,28 @@ function renderTomorrowTeaserHtml() {
       </div>
     </aside>
   `;
+}
+
+function preloadTomorrowAnimation() {
+  const teaserImg = document.querySelector(".teaser-gif[data-anim-src]");
+  if (!teaserImg) return;
+  const animSrc = teaserImg.getAttribute("data-anim-src");
+  const anim = new Image();
+  anim.onload = () => {
+    if (teaserImg.isConnected) {
+      teaserImg.src = animSrc;
+      teaserImg.removeAttribute("data-anim-src");
+    }
+  };
+  anim.onerror = () => {
+    teaserImg.removeAttribute("data-anim-src");
+  };
+  anim.src = animSrc;
+
+  if (anim.complete && anim.naturalWidth > 0) {
+    teaserImg.src = animSrc;
+    teaserImg.removeAttribute("data-anim-src");
+  }
 }
 
 function renderTodayStage(featuredEvents) {
@@ -731,6 +753,9 @@ function renderTodayStage(featuredEvents) {
 
   initTodaySwiper();
   startTomorrowTimer(isTomorrow);
+  if (isTomorrow) {
+    preloadTomorrowAnimation();
+  }
   const firstStage = todayEventsContainer.querySelector(".today-stage.is-birthday.is-day-0");
   fireStageConfetti(firstStage);
 }
