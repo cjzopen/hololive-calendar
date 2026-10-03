@@ -74,7 +74,7 @@ function renderMemberAvatarHtml(character, emoji, extraClass = "") {
   if (avatarUrl) {
     return `
       <div class="member-avatar ${extraClass}">
-        <img class="avatar-img" src="${avatarUrl}" alt="${name}" loading="lazy" onerror="handleAvatarError(this)" />
+        <img class="avatar-img" src="${avatarUrl}" alt="${name}" loading="lazy" width="240" height="240" onerror="handleAvatarError(this)" />
         <span class="avatar-emoji-fallback u-hidden">${emojiStr}</span>
       </div>
     `;
