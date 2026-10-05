@@ -171,5 +171,41 @@
         "2026-03-28"
       ]
     }
+  ],
+  ,
+  "IRyS 1st Concert “HOPE ||: Beyond the Stars”": [
+    {
+      "type": "special",
+      "character": "irys",
+      "date": "2026-10-06"
+    }
+  ],
+  "Sakura Miko 2nd Live “Blooming Parade!!”": [
+    {
+      "type": "special",
+      "character": "miko",
+      "date": "2026-10-29"
+    }
+  ],
+  "ときのそら 9th Anniversary Party「Everyday of Light」": [
+    {
+      "type": "special",
+      "character": "sora",
+      "date": "2026-11-07"
+    }
+  ],
+  "鷹嶺ルイ1stライブ “REBELLION”": [
+    {
+      "type": "special",
+      "character": "lui",
+      "date": "2026-12-16"
+    }
+  ],
+  "Hakui Koyori 1st Live “Dream Spark”": [
+    {
+      "type": "special",
+      "character": "koyori",
+      "date": "2026-12-22"
+    }
   ]
 }
