@@ -464,7 +464,55 @@ function renderApp() {
   renderCalendarView();
   renderMembersList();
   updateSidebarMemberStatus();
+  renderedDateKey = formatDateString(new Date());
+  scheduleMidnightRollover();
 }
+
+// ----------------------------------------------------
+// Day Rollover（換日）
+// 停留在頁面上：午夜直接 renderApp() 無縫切換
+// 從背景回來（分頁切換、鎖屏、bfcache）才發現換日：重新整理
+// ----------------------------------------------------
+let renderedDateKey = null;
+let midnightTimerId = null;
+
+function scheduleMidnightRollover() {
+  clearTimeout(midnightTimerId);
+  const now = new Date();
+  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  // 多等 50ms，避免計時器提早觸發時還停在舊的一天
+  midnightTimerId = setTimeout(handleDayRollover, nextMidnight.getTime() - now.getTime() + 50);
+}
+
+function handleDayRollover() {
+  if (formatDateString(new Date()) === renderedDateKey) {
+    // 提早觸發，重新排程到真正的午夜
+    scheduleMidnightRollover();
+    return;
+  }
+  // 背景分頁不重繪，等回到頁面時由 reloadIfDayChanged() 重新整理
+  if (document.hidden) return;
+
+  // 月曆原本選在「今天」的話，跟著移到新的今天
+  if (formatDateString(selectedDate) === renderedDateKey) {
+    selectedDate = new Date();
+    currentDate = new Date();
+  }
+  renderApp();
+}
+
+function reloadIfDayChanged() {
+  if (renderedDateKey && formatDateString(new Date()) !== renderedDateKey) {
+    location.reload();
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) reloadIfDayChanged();
+});
+window.addEventListener("pageshow", event => {
+  if (event.persisted) reloadIfDayChanged();
+});
 
 // ----------------------------------------------------
 // View 1: Home View (Today & Upcoming)
@@ -657,7 +705,7 @@ function renderStageHtml(item) {
       <div class="stage-bg" aria-hidden="true"><span class="stage-rays"></span></div>
       ${item.type === "special" ? `<span class="stage-spot _l" aria-hidden="true"></span><span class="stage-spot _r" aria-hidden="true"></span>` : ""}
       <div class="stage-confetti" aria-hidden="true">
-        ${item.type === "birthday" ? `<span class="stage-popper _l">${iconHtml("party-popper", "is-solo")}</span><span class="stage-popper _r">${iconHtml("party-popper", "is-solo")}</span>` : ""}
+        ${item.type === "birthday" ? ["_l", "_r"].map(pos => `<button type="button" class="stage-popper ${pos}" aria-label="クラッカーを鳴らす" title="クリックでお祝い！" onclick="fireStageConfetti(this.closest('.today-stage'), true)">${iconHtml("party-popper", "is-solo")}</button>`).join("") : ""}
       </div>
 
       <div class="stage-avatar-wrap" role="button" tabindex="0" title="クリックでお祝い！"
@@ -794,24 +842,30 @@ function startTomorrowTimer(isActive) {
   tomorrowTimerId = null;
   if (!isActive) return;
 
+  // 目標午夜在渲染時鎖定，不在每次 tick 重算（換日後重算會跳回 24 小時）
+  const now = new Date();
+  const targetMs = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime();
+
   const tick = () => {
     const timerEl = document.getElementById("tomorrow-timer");
     if (!timerEl) return;
-    const now = new Date();
-    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    const remain = Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
-    if (remain === 0) {
+    const remainMs = targetMs - Date.now();
+    if (remainMs <= 0) {
+      // 用 >= 判斷而非剛好等於 0，tick 延遲或錯過也一定會切換
       clearInterval(tomorrowTimerId);
-      renderHomeView();
+      timerEl.textContent = "00:00:00";
+      handleDayRollover();
       return;
     }
+    const remain = Math.ceil(remainMs / 1000);
     const h = String(Math.floor(remain / 3600)).padStart(2, "0");
     const m = String(Math.floor(remain % 3600 / 60)).padStart(2, "0");
     const sec = String(remain % 60).padStart(2, "0");
     timerEl.textContent = `${h}:${m}:${sec}`;
   };
   tick();
-  tomorrowTimerId = setInterval(tick, 1000);
+  // 250ms 更新一次，秒數跳動才不會因計時器誤差而跳格
+  tomorrowTimerId = setInterval(tick, 250);
 }
 
 function initTodaySwiper() {
