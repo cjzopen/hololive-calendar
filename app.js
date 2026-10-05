@@ -16,6 +16,9 @@ const memberSelect = document.getElementById("member-select");
 const filterCheckboxes = document.querySelectorAll(".filter-checkbox");
 const panelDateTitle = document.getElementById("panel-date-title");
 const panelEventsList = document.getElementById("panel-events-list");
+const dayDialog = document.getElementById("day-dialog");
+const dialogDateTitle = document.getElementById("dialog-date-title");
+const dialogEventsList = document.getElementById("dialog-events-list");
 const calendarMemberFilterBanner = document.getElementById("calendar-member-filter-banner");
 const calendarMemberFilterDesc = document.getElementById("calendar-member-filter-desc");
 const calendarClearMemberBtn = document.getElementById("calendar-clear-member-btn");
@@ -157,6 +160,7 @@ Promise.all([
   processSpecialEvents(specialData);
   populateMemberSelect();
   setupEventListeners();
+  setupDayDialog();
   renderApp();
   restoreSavedState();
 }).catch(err => {
@@ -1104,7 +1108,11 @@ function renderCalendarView() {
       selectedDate = new Date(year, month, d);
       document.querySelectorAll(".calendar-cards-grid .day-cell").forEach(c => c.classList.remove("is-active"));
       cell.classList.add("is-active");
-      renderSelectedDayPanel(true);
+      const eventCount = renderSelectedDayPanel(true);
+      // 手機/平板的面板在月曆下方看不到，有活動才開啟滿版視窗
+      if (dayDialogMediaQuery.matches && eventCount > 0) {
+        openDayDialog();
+      }
     };
 
     calendarGrid.appendChild(cell);
@@ -1113,9 +1121,10 @@ function renderCalendarView() {
   renderSelectedDayPanel();
 }
 
-// Right/Bottom Day Detail Panel
+// Right/Bottom Day Detail Panel（手機/平板的滿版視窗共用同一份內容）
+// 回傳當天的活動數量
 function renderSelectedDayPanel(shouldAnimate = false) {
-  if (!panelDateTitle || !panelEventsList) return;
+  if (!panelDateTitle || !panelEventsList) return 0;
 
   if (shouldAnimate) {
     panelEventsList.classList.remove("detail-inner");
@@ -1127,8 +1136,7 @@ function renderSelectedDayPanel(shouldAnimate = false) {
   const m = selectedDate.getMonth() + 1;
   const d = selectedDate.getDate();
   const w = weekdayNames[selectedDate.getDay()];
-
-  panelDateTitle.textContent = `${y}年${m}月${d}日 (${w})`;
+  const title = `${y}年${m}月${d}日 (${w})`;
 
   let events = getEventsForDate(selectedDate);
   if (activeMemberFilter) {
@@ -1138,42 +1146,80 @@ function renderSelectedDayPanel(shouldAnimate = false) {
     });
   }
 
-  if (events.length === 0) {
-    panelEventsList.innerHTML = `
+  const listHtml = events.length === 0
+    ? `
       <div class="panel-empty-state">
         <div class="empty-tea-icon">${iconHtml("coffee", "is-solo")}</div>
         <p>この日の予定はありません</p>
       </div>
-    `;
-    return;
+    `
+    : events.map(renderPanelEventItemHtml).join("");
+
+  panelDateTitle.textContent = title;
+  panelEventsList.innerHTML = listHtml;
+  if (dialogDateTitle && dialogEventsList) {
+    dialogDateTitle.textContent = title;
+    dialogEventsList.innerHTML = listHtml;
+  }
+  return events.length;
+}
+
+function renderPanelEventItemHtml(ev) {
+  const firstChar = Array.isArray(ev.character) ? ev.character[0] : ev.character;
+  const charColor = getMemberColorVar(firstChar);
+  const memberName = Array.isArray(ev.name) ? ev.name.join("、") : (ev.name || "");
+
+  let membersContent = "";
+  if (Array.isArray(ev.character) && ev.character.length > 1) {
+    const pills = ev.character.map((ch, idx) => {
+      const name = Array.isArray(ev.name) ? ev.name[idx] : ev.name;
+      return `<span class="mini-member-pill" style="--pill-color: ${getMemberColorVar(ch)};" onclick="event.stopPropagation(); openMemberSpotlight('${ch}')">${name}</span>`;
+    }).join("");
+    membersContent = `<div class="item-members-list">${pills}</div>`;
   }
 
-  panelEventsList.innerHTML = events.map(ev => {
-    const firstChar = Array.isArray(ev.character) ? ev.character[0] : ev.character;
-    const charColor = getMemberColorVar(firstChar);
-    const memberName = Array.isArray(ev.name) ? ev.name.join("、") : (ev.name || "");
-
-    let membersContent = "";
-    if (Array.isArray(ev.character) && ev.character.length > 1) {
-      const pills = ev.character.map((ch, idx) => {
-        const name = Array.isArray(ev.name) ? ev.name[idx] : ev.name;
-        return `<span class="mini-member-pill" style="--pill-color: ${getMemberColorVar(ch)};" onclick="event.stopPropagation(); openMemberSpotlight('${ch}')">${name}</span>`;
-      }).join("");
-      membersContent = `<div class="item-members-list">${pills}</div>`;
-    }
-
-    return `
-      <div class="panel-event-item" style="--item-color: ${charColor};" onclick="goToMemberOrCalendar('${firstChar || ""}')">
-        ${renderMemberAvatarHtml(firstChar, ev.emoji, "is-thumb")}
-        <div class="item-body">
-          <span class="type-label is-${ev.type}">${getTypeLabel(ev.type)}</span>
-          <div class="item-member-name">${memberName}</div>
-          ${ev.type === "special" ? `<div class="item-event-title">${ev.event}</div>` : ""}
-          ${membersContent}
-        </div>
+  return `
+    <div class="panel-event-item" style="--item-color: ${charColor};" onclick="goToMemberOrCalendar('${firstChar || ""}')">
+      ${renderMemberAvatarHtml(firstChar, ev.emoji, "is-thumb")}
+      <div class="item-body">
+        <span class="type-label is-${ev.type}">${getTypeLabel(ev.type)}</span>
+        <div class="item-member-name">${memberName}</div>
+        ${ev.type === "special" ? `<div class="item-event-title">${ev.event}</div>` : ""}
+        ${membersContent}
       </div>
-    `;
-  }).join("");
+    </div>
+  `;
+}
+
+// ----------------------------------------------------
+// Day Dialog（手機/平板：蓋滿畫面的當日詳細，點 ✕ 關閉）
+// ----------------------------------------------------
+const dayDialogMediaQuery = window.matchMedia("(max-width: 1100px)");
+
+function openDayDialog() {
+  if (!dayDialog || dayDialog.open) return;
+  dayDialog.showModal();
+  dialogEventsList.scrollTop = 0;
+}
+
+function closeDayDialog() {
+  if (dayDialog?.open) dayDialog.close();
+}
+
+function setupDayDialog() {
+  if (!dayDialog) return;
+
+  dayDialog.querySelector(".dialog-close-btn").addEventListener("click", closeDayDialog);
+
+  // 點活動或成員會切換頁面，視窗一起關閉
+  dialogEventsList.addEventListener("click", event => {
+    if (event.target.closest(".panel-event-item, .mini-member-pill")) closeDayDialog();
+  });
+
+  // 切回桌機寬度時改由右側面板顯示
+  dayDialogMediaQuery.addEventListener("change", event => {
+    if (!event.matches) closeDayDialog();
+  });
 }
 
 // Event Query Helper for Specific Date

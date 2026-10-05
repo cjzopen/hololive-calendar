@@ -238,6 +238,18 @@
                 <div id="panel-events-list" class="panel-events-list"></div>
               </div>
             </aside>
+
+            <!-- 手機/平板：點擊有活動的日子時，蓋滿畫面的當日詳細 -->
+            <dialog id="day-dialog" class="day-dialog calendar-detail-panel" aria-labelledby="dialog-date-title">
+              <div class="detail-panel-card">
+                <div class="detail-header">
+                  <span class="detail-badge">選択中の日付</span>
+                  <h3 id="dialog-date-title" class="panel-date-title"></h3>
+                </div>
+                <button type="button" class="dialog-close-btn" aria-label="閉じる">✕</button>
+                <div id="dialog-events-list" class="panel-events-list"></div>
+              </div>
+            </dialog>
           </div>
         </section>
 

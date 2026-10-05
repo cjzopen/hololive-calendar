@@ -155,6 +155,7 @@ body {
 button {
   font-family: inherit;
   cursor: pointer;
+  user-select: none;
   border: none;
   background-color: transparent;
   background-image: none;
@@ -2341,6 +2342,97 @@ input {
         font-weight: 700;
       }
     }
+  }
+}
+
+/* Day Dialog：手機/平板點擊有活動的日子時，蓋滿畫面（沿用 .calendar-detail-panel 的內容樣式） */
+:root:has(.day-dialog[open]) {
+  overflow: hidden;
+}
+
+/* 疊加 .calendar-detail-panel 提高特異性，避免被平板斷點的 position: static 蓋掉 */
+.calendar-detail-panel.day-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background-color: var(--color-white);
+  opacity: 0;
+  translate: 0 24px;
+  transition: opacity .25s ease, translate .25s var(--ease-out), overlay .25s allow-discrete, display .25s allow-discrete;
+
+  &[open] {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  &::backdrop {
+    background-color: var(--color-white);
+  }
+
+  .detail-panel-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 1.5rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+
+    .detail-header .detail-badge {
+      position: relative;
+      top: auto;
+      left: auto;
+      margin-bottom: .4rem;
+    }
+
+    .panel-date-title {
+      padding-right: 3rem;
+    }
+  }
+
+  .dialog-close-btn {
+    position: absolute;
+    top: 1.2rem;
+    right: 1rem;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    color: var(--color-gray);
+    background-color: var(--color-paper-soft);
+
+    &:focus-visible {
+      outline: 2px solid var(--color-sub);
+      outline-offset: 2px;
+    }
+  }
+
+  .panel-events-list {
+    flex-grow: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 2px 2px .25rem;
+  }
+}
+
+@starting-style {
+  .calendar-detail-panel.day-dialog[open] {
+    opacity: 0;
+    translate: 0 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day-dialog {
+    transition-duration: .01s;
   }
 }
 
