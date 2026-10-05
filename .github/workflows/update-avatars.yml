@@ -1,7 +1,7 @@
-# 每月 15 日以 YouTube Data API 更新成員頭像（240px WebP）
+# 每月 15 日以 YouTube Data API 更新成員頭像（240px WebP）與 banner（1280×720 WebP）
 # 需要在 GitHub repo 的 Settings → Secrets and variables → Actions 新增 YOUTUBE_API_KEY
-# 取得失敗的成員會保留原本的頭像；只有頭像有變更時才會 commit
-name: 更新成員頭像
+# 取得失敗的成員會保留原本的圖片；只有圖片有變更時才會 commit
+name: 更新成員頭像與 banner
 
 on:
   schedule:
@@ -28,21 +28,21 @@ jobs:
         with:
           node-version: 24
 
-      - name: 下載並壓縮頭像
+      - name: 下載並壓縮頭像與 banner
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: |
           npm install --no-save sharp
           node tools/fetch-avatars.mjs
 
-      - name: Commit 變更的頭像
+      - name: Commit 變更的圖片
         run: |
-          if [ -z "$(git status --porcelain -- images/avatars)" ]; then
-            echo "頭像沒有變更，不需要 commit"
+          if [ -z "$(git status --porcelain -- images/avatars images/banners)" ]; then
+            echo "頭像與 banner 沒有變更，不需要 commit"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add images/avatars
-          git commit -m "chore: 每月更新成員頭像"
+          git add images/avatars images/banners
+          git commit -m "chore: 每月更新成員頭像與 banner"
           git push
