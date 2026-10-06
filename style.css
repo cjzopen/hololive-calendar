@@ -1344,6 +1344,11 @@ input {
   height: 100%;
   padding: 0 10px 10px 0;
 
+  /* Swiper 延遲載入期間只顯示第一張，避免卡片直排閃一下 */
+  &:not(.swiper-initialized) .swiper-slide:not(:first-child) {
+    display: none;
+  }
+
   .swiper-slide {
     height: auto;
 

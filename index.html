@@ -24,12 +24,19 @@
   <meta name="twitter:title" content="ホロこよみ（非公式）| hololive calendar">
   <meta name="twitter:description" content="ホロライブプロダクション所属タレントの誕生日、デビュー日、ライブ・イベント等の情報カレンダー。">
   <meta name="twitter:image" content="https://cjzopen.github.io/hololive-calendar/images/og.jpg">
+  <link rel="preload" href="fixed-events.json" as="fetch" crossorigin>
+  <link rel="preload" href="special-events.json" as="fetch" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- 字型 CSS 不擋首次繪製：先以 print 載入，完成後切成 all -->
   <link
     href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@14/swiper-bundle.min.css" />
+    rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap"
+      rel="stylesheet">
+  </noscript>
   <link rel="stylesheet" href="style.min.css" />
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-HYXNTEXRJ5"></script>
   <script>
@@ -1812,7 +1819,6 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/swiper@14/swiper-bundle.min.js" defer></script>
   <script src="app.min.js" defer></script>
   <script src="icons.min.js" defer></script>
 </body>

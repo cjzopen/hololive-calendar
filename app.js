@@ -872,12 +872,51 @@ function startTomorrowTimer(isActive) {
   tomorrowTimerId = setInterval(tick, 250);
 }
 
+// Swiper 只有 TODAY 區塊有 2 個以上事件時才需要，用到時才載入
+let swiperLoader = null;
+function loadSwiper() {
+  if (typeof Swiper !== "undefined") return Promise.resolve();
+  swiperLoader ??= new Promise((resolve, reject) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "lib/swiper-bundle.min.css";
+    const cssLoaded = new Promise(res => {
+      link.onload = res;
+      link.onerror = res; // CSS 失敗不擋 JS，至少能滑
+    });
+    document.head.append(link);
+
+    const script = document.createElement("script");
+    script.src = "lib/swiper-bundle.min.js";
+    const jsLoaded = new Promise((res, rej) => {
+      script.onload = res;
+      script.onerror = rej;
+    });
+    document.head.append(script);
+
+    Promise.all([cssLoaded, jsLoaded]).then(resolve, err => {
+      swiperLoader = null; // 失敗允許下次重試
+      reject(err);
+    });
+  });
+  return swiperLoader;
+}
+
 function initTodaySwiper() {
   todaySwiper?.destroy(true, true);
   todaySwiper = null;
-  if (typeof Swiper === "undefined" || !document.querySelector(".today-swiper")) return;
+  if (!document.querySelector(".today-swiper")) return;
 
-  todaySwiper = new Swiper(".today-swiper", {
+  loadSwiper().then(createTodaySwiper, () => {});
+}
+
+function createTodaySwiper() {
+  // 載入期間可能已重新渲染（換日等），以當下 DOM 為準
+  const el = document.querySelector(".today-swiper");
+  if (!el || el.swiper) return;
+  todaySwiper?.destroy(true, true);
+
+  todaySwiper = new Swiper(el, {
     slidesPerView: 1,
     spaceBetween: 24,
     grabCursor: true,
