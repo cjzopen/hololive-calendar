@@ -77,7 +77,7 @@ function renderMemberAvatarHtml(character, emoji, extraClass = "") {
   if (avatarUrl) {
     return `
       <div class="member-avatar ${extraClass}">
-        <img class="avatar-img" src="${avatarUrl}" alt="${name}" loading="lazy" width="240" height="240" onerror="handleAvatarError(this)" />
+        <img class="avatar-img" src="${avatarUrl}" alt="${name}"${extraClass.includes("stage-avatar") ? "" : ' loading="lazy"'} width="240" height="240" onerror="handleAvatarError(this)" />
         <span class="avatar-emoji-fallback u-hidden">${emojiStr}</span>
       </div>
     `;
@@ -708,7 +708,7 @@ function renderStageHtml(item) {
     <article class="today-stage is-${item.type} is-day-${item.diffDays}" data-member="${slug || ""}" style="--stage-color: ${getMemberColorVar(slug)};">
       <div class="stage-bg" aria-hidden="true"><span class="stage-rays"></span></div>
       ${item.type === "special" ? `<span class="stage-spot _l" aria-hidden="true"></span><span class="stage-spot _r" aria-hidden="true"></span>` : ""}
-      <div class="stage-confetti" aria-hidden="true">
+      <div class="stage-confetti">
         ${item.type === "birthday" ? ["_l", "_r"].map(pos => `<button type="button" class="stage-popper ${pos}" aria-label="クラッカーを鳴らす" title="クリックでお祝い！" onclick="fireStageConfetti(this.closest('.today-stage'), true)">${iconHtml("party-popper", "is-solo")}</button>`).join("") : ""}
       </div>
 
