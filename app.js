@@ -470,6 +470,7 @@ function renderApp() {
   updateSidebarMemberStatus();
   renderedDateKey = formatDateString(new Date());
   scheduleMidnightRollover();
+  scheduleFunDayCheck();
 }
 
 // ----------------------------------------------------
@@ -517,6 +518,75 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("pageshow", event => {
   if (event.persisted) reloadIfDayChanged();
 });
+
+// ----------------------------------------------------
+// Fun Days（每年固定的特別節日，整頁特效）
+// 今天沒有任何事件才載入 fun-days.json，有對應節日才載入 fun-days.min.js
+// 預覽：網址加 ?funday=10-04（略過「當天有事件」的判斷）；日期不固定的節日用名稱當 key，例如 ?funday=setsubun
+// ----------------------------------------------------
+let funDaysLoader = null;
+let funDaysScriptLoader = null;
+
+function scheduleFunDayCheck() {
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(checkFunDay, { timeout: 3000 });
+  } else {
+    setTimeout(checkFunDay, 1000);
+  }
+}
+
+function checkFunDay() {
+  const previewKey = new URLSearchParams(location.search).get("funday");
+  const today = new Date();
+  if (!previewKey && getEventsForDate(today).length > 0) {
+    window.stopFunDay?.();
+    return;
+  }
+
+  const dateKey = formatDateString(today).slice(5);
+  const key = previewKey || (dateKey === getSetsubunDateKey(today.getFullYear()) ? "setsubun" : dateKey);
+  loadFunDays().then(days => {
+    const day = days[key];
+    if (!day) {
+      window.stopFunDay?.();
+      return;
+    }
+    return loadFunDaysScript().then(() => window.startFunDay(key, day, { preview: !!previewKey }));
+  }).catch(err => {
+    console.error("Fun Day 読み込み失敗:", err);
+  });
+}
+
+// 節分＝立春前一天，每年在 2/2 或 2/3（立春簡易公式，適用 2001–2099 年）
+function getSetsubunDateKey(year) {
+  const risshun = Math.floor(3.87 + 0.242194 * (year - 2000) - Math.trunc((year - 2001) / 4));
+  return `02-${String(risshun - 1).padStart(2, "0")}`;
+}
+
+function loadFunDays() {
+  funDaysLoader ??= fetch("fun-days.json")
+    .then(res => res.json())
+    .catch(err => {
+      funDaysLoader = null; // 失敗允許下次重試
+      throw err;
+    });
+  return funDaysLoader;
+}
+
+function loadFunDaysScript() {
+  funDaysScriptLoader ??= new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "fun-days.min.js";
+    script.onload = resolve;
+    script.onerror = err => {
+      funDaysScriptLoader = null; // 失敗允許下次重試
+      script.remove();
+      reject(err);
+    };
+    document.head.append(script);
+  });
+  return funDaysScriptLoader;
+}
 
 // ----------------------------------------------------
 // View 1: Home View (Today & Upcoming)

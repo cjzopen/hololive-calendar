@@ -35,6 +35,7 @@ tasks = [
     ("style.css", "style.min.css", minify_css),
     ("app.js", "app.min.js", minify_js),
     ("icons.js", "icons.min.js", minify_js),
+    ("fun-days.js", "fun-days.min.js", minify_js),
 ]
 
 for src_name, dst_name, minifier in tasks:

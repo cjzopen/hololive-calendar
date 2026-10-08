@@ -1,0 +1,76 @@
+{
+  "setsubun": {
+    "name": "節分",
+    "character": "ayame"
+  },
+  "01-04": {
+    "name": "石の日",
+    "character": "bijou"
+  },
+  "03-27": {
+    "name": "さくらの日",
+    "character": "miko"
+  },
+  "04-19": {
+    "name": "地図の日",
+    "character": "azki"
+  },
+  "04-29": {
+    "name": "羊肉の日",
+    "character": "watame"
+  },
+  "05-03": {
+    "name": "ゴミの日",
+    "character": "ui",
+    "emoji": "🗑️"
+  },
+  "05-04": {
+    "name": "こよの日",
+    "character": "koyori"
+  },
+  "06-04": {
+    "name": "虫の日",
+    "character": "nene"
+  },
+  "07-07": {
+    "name": "七夕 あまにょ様降臨",
+    "character": "korone",
+    "effect": "tanabata",
+    "lines": [
+      "あまにょ様にかけた願いが",
+      "ぜんぶ叶いますように"
+    ]
+  },
+  "09-06": {
+    "name": "妹の日",
+    "character": "mococo"
+  },
+  "10-04": {
+    "name": "天使の日",
+    "character": "kanata",
+    "effect": "angel"
+  },
+  "10-08": {
+    "name": "トワの日",
+    "character": "towa"
+  },
+  "11-08": {
+    "name": "いいおっぱいの日"
+  },
+  "11-29": {
+    "name": "いい肉の日",
+    "emoji": "🍖"
+  },
+  "12-06": {
+    "name": "姉の日",
+    "character": "fuwawa"
+  },
+  "12-07": {
+    "name": "クリスマスツリーの日",
+    "character": "korone"
+  },
+  "12-13": {
+    "name": "双子の日",
+    "character": "fuwawa"
+  }
+}
