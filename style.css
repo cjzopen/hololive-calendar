@@ -1695,6 +1695,11 @@ input {
 }
 
 .photo-card {
+  /* 多人活動、團體：不連到單一成員，沒有點擊 */
+  &.is-group {
+    cursor: default;
+  }
+
   .photo-card-kira {
     position: absolute;
     z-index: 3;

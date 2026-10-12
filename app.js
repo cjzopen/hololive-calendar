@@ -47,13 +47,30 @@ let fixedGroups = {}; // 團體（type: "group"），只用來產生結成記念
 let anniversaryList = []; // 每年固定的紀念日（生日、出道、爆誕、結成）
 let specialEventsByDate = {};
 let allSpecialEventsList = [];
-let currentDate = new Date();
-let selectedDate = new Date();
+// 測試模式：網址加 ?test=yyyy-mm-dd，整站把那天當成今天（格式不對或日期不存在就忽略）
+const testDate = parseTestDate(new URLSearchParams(location.search).get("test"));
+let currentDate = getToday();
+let selectedDate = getToday();
 let activeView = "home";
 let upcomingFilter = "all";
 let activeMemberFilter = null; // 当選されたメンバーのslug
 
 const weekdayNames = ["日", "月", "火", "水", "木", "金", "土"];
+
+function parseTestDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || "");
+  if (!match) return null;
+  const [y, m, d] = match.slice(1).map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d ? date : null;
+}
+
+// 今天（測試模式為測試日期，時刻沿用現在）
+function getToday() {
+  const now = new Date();
+  if (!testDate) return now;
+  return new Date(testDate.getFullYear(), testDate.getMonth(), testDate.getDate(), now.getHours(), now.getMinutes(), now.getSeconds());
+}
 
 // UI 圖示：Lucide placeholder，由 icons.js 換成 <svg>
 const typeIcons = { birthday: "cake", debut: "megaphone", special: "sparkles" };
@@ -123,7 +140,7 @@ function renderPhotoCardHtml({ character, name, emoji, event, type, label, dateO
   const slug = Array.isArray(character) ? character[0] : character;
   const charColor = getMemberColorVar(slug);
   return `
-    <article class="photo-card" data-member="${slug || ""}" style="--photo-color: ${charColor};" onclick="goToMemberOrCalendar('${slug || ""}')">
+    <article class="photo-card${isGroup ? " is-group" : ""}" data-member="${slug || ""}" style="--photo-color: ${charColor};"${isGroup ? "" : ` onclick="goToMemberOrCalendar('${slug || ""}')"`}>
       <span class="photo-card-kira _rt" aria-hidden="true">✦</span>
       <span class="photo-card-kira _lb" aria-hidden="true">✦</span>
       <div class="photo-card-img">
@@ -282,7 +299,7 @@ function syncMemberSelect() {
 function getNextMemberEvent(slug) {
   const member = fixedEvents[slug];
   if (!member) return null;
-  const today = new Date();
+  const today = getToday();
   today.setHours(0, 0, 0, 0);
 
   const candidates = anniversaryList
@@ -360,8 +377,8 @@ function setupEventListeners() {
 
   if (todayBtn) {
     todayBtn.onclick = () => {
-      currentDate = new Date();
-      selectedDate = new Date();
+      currentDate = getToday();
+      selectedDate = getToday();
       executeTransition(() => renderCalendarView());
     };
   }
@@ -544,6 +561,8 @@ let midnightTimerId = null;
 
 function scheduleMidnightRollover() {
   clearTimeout(midnightTimerId);
+  // 測試模式固定在測試日期，不換日
+  if (testDate) return;
   const now = new Date();
   const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   // 多等 50ms，避免計時器提早觸發時還停在舊的一天
@@ -568,6 +587,7 @@ function handleDayRollover() {
 }
 
 function reloadIfDayChanged() {
+  if (testDate) return;
   if (renderedDateKey && formatDateString(new Date()) !== renderedDateKey) {
     location.reload();
   }
@@ -583,7 +603,7 @@ window.addEventListener("pageshow", event => {
 // ----------------------------------------------------
 // Fun Days（每年固定的特別節日，整頁特效）
 // 不管今天有沒有其它事件都會檢查；有對應節日才載入 fun-days.min.js
-// 預覽：網址加 ?test=10-04；日期不固定的節日用名稱當 key，例如 ?test=setsubun
+// 預覽：網址加 ?test=yyyy-mm-dd（測試模式下關過的特效也會顯示）
 // ----------------------------------------------------
 let funDaysLoader = null;
 let funDaysScriptLoader = null;
@@ -597,17 +617,16 @@ function scheduleFunDayCheck() {
 }
 
 function checkFunDay() {
-  const previewKey = new URLSearchParams(location.search).get("test");
-  const today = new Date();
+  const today = getToday();
   const dateKey = formatDateString(today).slice(5);
-  const key = previewKey || (dateKey === getSetsubunDateKey(today.getFullYear()) ? "setsubun" : dateKey);
+  const key = dateKey === getSetsubunDateKey(today.getFullYear()) ? "setsubun" : dateKey;
   loadFunDays().then(days => {
     const day = days[key];
     if (!day) {
       window.stopFunDay?.();
       return;
     }
-    return loadFunDaysScript().then(() => window.startFunDay(key, day, { preview: !!previewKey }));
+    return loadFunDaysScript().then(() => window.startFunDay(key, day, { preview: !!testDate }));
   }).catch(err => {
     console.error("Fun Day 読み込み失敗:", err);
   });
@@ -648,7 +667,7 @@ function loadFunDaysScript() {
 // View 1: Home View (Today & Upcoming)
 // ----------------------------------------------------
 function renderHomeView() {
-  const today = new Date();
+  const today = getToday();
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
   const day = today.getDate();
@@ -703,7 +722,7 @@ function renderHomeView() {
 const UPCOMING_DAYS = 32;
 
 function buildUpcomingList() {
-  const today = new Date();
+  const today = getToday();
   today.setHours(0, 0, 0, 0);
 
   const upcomingList = [];
@@ -1177,7 +1196,7 @@ function formatDisplayDate(date) {
 function renderCalendarView() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-  const today = new Date();
+  const today = getToday();
   const enabledTypes = Array.from(filterCheckboxes)
     .filter(cb => cb.checked)
     .map(cb => cb.value);
@@ -1473,7 +1492,7 @@ function renderMembersList() {
     );
   });
 
-  const today = new Date();
+  const today = getToday();
   today.setHours(0, 0, 0, 0);
 
   membersGrid.innerHTML = filtered.map(member => {
@@ -1557,7 +1576,7 @@ function renderMemberSpotlightContent(slug) {
   const member = fixedEvents[slug];
   if (!member) return;
 
-  const today = new Date();
+  const today = getToday();
   today.setHours(0, 0, 0, 0);
 
   const colorVar = getMemberColorVar(slug);

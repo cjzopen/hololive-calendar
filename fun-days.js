@@ -522,6 +522,7 @@
   `;
 
   const DISMISS_STORAGE_KEY = "funDayDismissed";
+  let isPreview = false;
 
   let activeKey = null;
   let stopActive = null;
@@ -550,6 +551,8 @@
   }
 
   function rememberDismissed(key) {
+    // 測試模式（預覽）關掉不記錄，以免影響真正那天的顯示
+    if (isPreview) return;
     try {
       localStorage.setItem(DISMISS_STORAGE_KEY, getDismissValue(key));
     } catch {
@@ -633,6 +636,7 @@
   function startFunDay(key, day, { preview = false } = {}) {
     if (activeKey === key) return;
     stopFunDay();
+    isPreview = preview;
 
     const effect = FUN_DAY_EFFECTS[day.effect];
     if (effect) {
