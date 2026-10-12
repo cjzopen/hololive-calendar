@@ -1430,7 +1430,8 @@ input {
 .today-swiper-next {
   position: absolute;
   z-index: 5;
-  bottom: 1.6rem;
+  /* 放右上角，避開右下的拉花 */
+  top: 1.25rem;
   display: grid;
   place-items: center;
   width: 40px;
