@@ -109,6 +109,41 @@ function renderMemberAvatarHtml(character, emoji, extraClass = "") {
   `;
 }
 
+// 多人活動（團體有自己的頭像，不算）：回傳成員清單，否則 null
+function getCollageMembers(item) {
+  return item.members && !fixedGroups[item.character] ? item.members : null;
+}
+
+// 多人活動頭像：拼貼格子。欄數 = ceil(√n)，最後一列不足時拉寬補滿
+// 例：8 人 → 3 + 3 + 2，底層切成 lcm(3, 2) = 6 欄，前兩列每格跨 2 欄、最後一列每格跨 3 欄
+function renderCollageAvatarHtml(members, extraClass = "") {
+  const count = members.length;
+  const cols = Math.ceil(Math.sqrt(count));
+  const rows = Math.ceil(count / cols);
+  const lastRowStart = cols * (rows - 1);
+  const lastRowCount = count - lastRowStart;
+  const gcd = (a, b) => b ? gcd(b, a % b) : a;
+  const gridCols = cols * lastRowCount / gcd(cols, lastRowCount);
+  const isStage = extraClass.includes("stage-avatar");
+
+  const cellsHtml = members.map((slug, i) => {
+    const span = gridCols / (i >= lastRowStart ? lastRowCount : cols);
+    const member = fixedEvents[slug];
+    const emojiStr = member?.emoji || "✨";
+    const avatarUrl = getMemberAvatarUrl(slug);
+    const innerHtml = avatarUrl
+      ? `<img class="avatar-img" src="${avatarUrl}" alt="${member?.name || slug}"${isStage ? "" : ' loading="lazy"'} width="240" height="240" onerror="handleAvatarError(this)" /><span class="avatar-emoji-fallback u-hidden">${emojiStr}</span>`
+      : `<span class="avatar-emoji-fallback">${emojiStr}</span>`;
+    return `<span class="collage-cell" style="grid-column: span ${span}; --cell-color: ${getMemberColorVar(slug)};">${innerHtml}</span>`;
+  }).join("");
+
+  return `
+    <div class="member-avatar is-collage ${extraClass}" style="--collage-cols: ${gridCols}; --collage-rows: ${rows};">
+      ${cellsHtml}
+    </div>
+  `;
+}
+
 window.handleAvatarError = function(img) {
   img.classList.add("u-hidden");
   img.parentElement?.querySelector(".avatar-emoji-fallback")?.classList.remove("u-hidden");
@@ -136,15 +171,20 @@ function getTypeLabel(type) {
 }
 
 // Polaroid Photo Card (Today / Upcoming)
-function renderPhotoCardHtml({ character, name, emoji, event, type, label, dateObj, tagLabel, tagClass = "", isGroup = false }) {
+function renderPhotoCardHtml({ character, members, name, emoji, event, type, label, dateObj, tagLabel, tagClass = "", isGroup = false }) {
   const slug = Array.isArray(character) ? character[0] : character;
-  const charColor = getMemberColorVar(slug);
+  const collageMembers = getCollageMembers({ character: slug, members });
+  // 多人活動：不套單一成員的顏色
+  const charColor = collageMembers ? "var(--color-main)" : getMemberColorVar(slug);
+  // 多人活動：標題放活動名，下方列出成員
+  const titleText = collageMembers ? event : (name || "hololive");
+  const eventText = collageMembers ? collageMembers.map(c => fixedEvents[c]?.name || c).join("・") : event;
   return `
-    <article class="photo-card${isGroup ? " is-group" : ""}" data-member="${slug || ""}" style="--photo-color: ${charColor};"${isGroup ? "" : ` onclick="goToMemberOrCalendar('${slug || ""}')"`}>
+    <article class="photo-card${isGroup ? " is-group" : ""}" data-member="${collageMembers ? "" : slug || ""}" style="--photo-color: ${charColor};"${isGroup ? "" : ` onclick="goToMemberOrCalendar('${slug || ""}')"`}>
       <span class="photo-card-kira _rt" aria-hidden="true">✦</span>
       <span class="photo-card-kira _lb" aria-hidden="true">✦</span>
       <div class="photo-card-img">
-        ${renderMemberAvatarHtml(slug, emoji)}
+        ${collageMembers ? renderCollageAvatarHtml(collageMembers) : renderMemberAvatarHtml(slug, emoji)}
         <div class="photo-deco-hanko ${tagClass}">
           <span class="hanko-text">${formatHankoLabel(tagLabel)}</span>
         </div>
@@ -152,10 +192,10 @@ function renderPhotoCardHtml({ character, name, emoji, event, type, label, dateO
       <div class="photo-card-body">
         <span class="type-label is-${type}">${label || getTypeLabel(type)}</span>
         <div class="photo-card-name">
-          <span class="name-jp">${name || "hololive"}</span>
-          ${slug && !fixedGroups[slug] ? `<span class="name-en">${slug}</span>` : ""}
+          <span class="name-jp">${titleText}</span>
+          ${slug && !isGroup ? `<span class="name-en">${slug}</span>` : ""}
         </div>
-        <p class="photo-card-event">${event}</p>
+        <p class="photo-card-event">${eventText}</p>
         <div class="photo-card-bottom">
           <time class="photo-card-date" datetime="${formatDateString(dateObj)}">${formatDisplayDate(dateObj)}${dateObj.getDay() === 1 ? `<img class="monday-face" src="images/deco/monday-face.webp" alt="月曜日" title="月曜日…" width="24" height="24" loading="lazy" />` : ""}</time>
           ${isGroup ? "" : renderHeartButtonHtml(slug)}
@@ -774,6 +814,7 @@ function buildUpcomingList() {
       upcomingList.push({
         type: "special",
         character: firstChar,
+        members: characters.length > 1 ? characters : null,
         name: charName,
         emoji: charEmoji,
         event: ev.event,
@@ -856,15 +897,20 @@ function renderStageHtml(items) {
   const slug = item.character;
   const kicker = (stageKickers[item.type] || stageKickers.special)[Math.min(item.diffDays, 2)];
   const countdown = item.diffDays === 0 ? "本日！" : getCountdownBadge(item.diffDays).label;
-  const oshiBubblesHtml = item.emoji
-    ? ["_a", "_b", "_c"].map(pos => `<span class="stage-bubble ${pos}" aria-hidden="true">${item.emoji}</span>`).join("")
+  const collageMembers = getCollageMembers(item);
+  // 多人活動：泡泡輪流用不同成員的推しマーク
+  const bubbleEmojis = collageMembers
+    ? [...new Set(collageMembers.map(c => fixedEvents[c]?.emoji).filter(Boolean))]
+    : [item.emoji].filter(Boolean);
+  const oshiBubblesHtml = bubbleEmojis.length
+    ? ["_a", "_b", "_c"].map((pos, i) => `<span class="stage-bubble ${pos}" aria-hidden="true">${bubbleEmojis[i % bubbleEmojis.length]}</span>`).join("")
     : "";
   const eventText = items.length === 1
     ? item.event
     : items.map(i => i.type === "special" ? i.event : (i.label || getTypeLabel(i.type))).join("・");
 
   return `
-    <article class="today-stage is-${item.type} is-day-${item.diffDays}" data-member="${slug || ""}" style="--stage-color: ${getMemberColorVar(slug)};">
+    <article class="today-stage is-${item.type} is-day-${item.diffDays}${collageMembers ? " is-multi" : ""}" data-member="${collageMembers ? "" : slug || ""}" style="--stage-color: ${collageMembers ? "var(--color-main)" : getMemberColorVar(slug)};">
       <div class="stage-bg" aria-hidden="true"><span class="stage-rays"></span></div>
       ${types.includes("special") ? `<span class="stage-spot _l" aria-hidden="true"></span><span class="stage-spot _r" aria-hidden="true"></span>` : ""}
       <div class="stage-confetti">
@@ -875,7 +921,7 @@ function renderStageHtml(items) {
            onclick="fireStageConfetti(this.closest('.today-stage'), true)"
            onkeydown="if (event.key === 'Enter') fireStageConfetti(this.closest('.today-stage'), true)">
         <span class="stage-ring" aria-hidden="true"></span>
-        ${renderMemberAvatarHtml(slug, item.emoji, "stage-avatar")}
+        ${collageMembers ? renderCollageAvatarHtml(collageMembers, "stage-avatar") : renderMemberAvatarHtml(slug, item.emoji, "stage-avatar")}
         ${renderStageDecoHtml(types)}
         ${oshiBubblesHtml}
       </div>
@@ -885,11 +931,20 @@ function renderStageHtml(items) {
         <div class="stage-labels">
           ${items.map(i => `<span class="type-label is-${i.type}">${i.label || getTypeLabel(i.type)}</span>`).join("")}
         </div>
-        <h4 class="stage-name">
-          <span class="name-jp">${item.name || "hololive"}</span>
-          ${slug && !Array.isArray(slug) && !fixedGroups[slug] ? `<span class="name-en">${slug}</span>` : ""}
-        </h4>
-        <p class="stage-event">${eventText}</p>
+        ${collageMembers ? `
+          <h4 class="stage-name">
+            <span class="name-jp">${item.event}</span>
+          </h4>
+          <div class="stage-members">
+            ${collageMembers.map(c => `<span class="stage-member-pill" style="--pill-color: ${getMemberColorVar(c)};">${fixedEvents[c]?.name || c}</span>`).join("")}
+          </div>
+        ` : `
+          <h4 class="stage-name">
+            <span class="name-jp">${item.name || "hololive"}</span>
+            ${slug && !item.isGroup ? `<span class="name-en">${slug}</span>` : ""}
+          </h4>
+          <p class="stage-event">${eventText}</p>
+        `}
         <div class="stage-meta">
           <time class="stage-date">${formatDisplayDate(item.dateObj)}</time>
           <span class="stage-countdown">${countdown}</span>

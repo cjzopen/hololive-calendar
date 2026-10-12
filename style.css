@@ -399,6 +399,29 @@ input {
     filter: drop-shadow(0 6px 14px color-mix(in srgb, #000 14%, transparent));
   }
 
+  /* 多人活動：拼貼格子（欄列數由 app.js 計算） */
+  &.is-collage {
+    display: grid;
+    grid-template-columns: repeat(var(--collage-cols), minmax(0, 1fr));
+    grid-template-rows: repeat(var(--collage-rows), minmax(0, 1fr));
+    gap: 2px;
+    background-color: var(--color-white);
+  }
+
+  .collage-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--cell-color, var(--color-main)) 30%, white);
+
+    .avatar-emoji-fallback {
+      font-size: 1.4rem;
+    }
+  }
+
   &.is-thumb {
     width: 52px;
     height: 52px;
@@ -976,10 +999,20 @@ input {
     }
   }
 
-  .stage-labels {
+  .stage-labels,
+  .stage-members {
     display: flex;
     flex-wrap: wrap;
     gap: .4rem;
+  }
+
+  .stage-member-pill {
+    font-size: .85rem;
+    font-weight: 700;
+    padding: .15rem .7rem;
+    border-radius: var(--radius-full);
+    background-color: color-mix(in srgb, var(--pill-color, var(--color-main)) 26%, white);
+    color: var(--color-black);
   }
 
   .stage-name {
@@ -1081,6 +1114,18 @@ input {
 
   .avatar-emoji-fallback {
     font-size: 5rem;
+  }
+}
+
+/* 多人活動：圓角方形，格子才不會被圓框切掉 */
+.today-stage.is-multi {
+  .stage-avatar-wrap .stage-avatar.is-collage {
+    border-radius: var(--radius-lg);
+  }
+
+  .stage-ring {
+    border-radius: calc(var(--radius-lg) + 16px);
+    animation: none;
   }
 }
 
@@ -3117,6 +3162,7 @@ input {
     }
 
     .stage-labels,
+    .stage-members,
     .stage-name,
     .stage-meta {
       justify-content: center;
