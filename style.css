@@ -84,6 +84,7 @@
   --kurosama-color: #3a3a48;
   --burinyan-color: #f352c0;
   --ai-koyori-color: #ffb6c1;
+  --danchomu-color: var(--noel-color);
 
   /* Theme Design Tokens (odeholo.com) */
   --color-main: #FF6E9D;
