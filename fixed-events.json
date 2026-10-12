@@ -588,7 +588,7 @@
   },
   "gamers": {
     "type": "group",
-    "name": "ホロライブゲーマーズ",
+    "name": "ゲーマーズ",
     "emoji": "🎮",
     "members": ["fubuki", "mio", "okayu", "korone"],
     "formed": "2018-12-13",

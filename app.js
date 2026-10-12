@@ -114,32 +114,51 @@ function getCollageMembers(item) {
   return item.members && !fixedGroups[item.character] ? item.members : null;
 }
 
-// 多人活動頭像：拼貼格子。欄數 = ceil(√n)，最後一列不足時拉寬補滿
-// 例：8 人 → 3 + 3 + 2，底層切成 lcm(3, 2) = 6 欄，前兩列每格跨 2 欄、最後一列每格跨 3 欄
-function renderCollageAvatarHtml(members, extraClass = "") {
-  const count = members.length;
-  const cols = Math.ceil(Math.sqrt(count));
-  const rows = Math.ceil(count / cols);
-  const lastRowStart = cols * (rows - 1);
-  const lastRowCount = count - lastRowStart;
-  const gcd = (a, b) => b ? gcd(b, a % b) : a;
-  const gridCols = cols * lastRowCount / gcd(cols, lastRowCount);
-  const isStage = extraClass.includes("stage-avatar");
+// 多人活動頭像：切 pizza。從 12 點鐘方向順時針切成 n 片扇形，每片一位成員；超過 8 人時隨機挑 8 人
+const PIZZA_MAX_SLICES = 8;
 
-  const cellsHtml = members.map((slug, i) => {
-    const span = gridCols / (i >= lastRowStart ? lastRowCount : cols);
+// 隨機挑 count 人，維持原本的順序
+function pickRandomMembers(members, count) {
+  if (members.length <= count) return members;
+  const picked = new Set();
+  while (picked.size < count) {
+    picked.add(Math.floor(Math.random() * members.length));
+  }
+  return members.filter((_, i) => picked.has(i));
+}
+
+function renderCollageAvatarHtml(members, extraClass = "") {
+  const shown = pickRandomMembers(members, PIZZA_MAX_SLICES);
+  const sliceCount = shown.length;
+  const isStage = extraClass.includes("stage-avatar");
+  const sliceAngle = 360 / sliceCount;
+  // 以容器百分比計算：角度 deg、距中心 r（50 = 半寬）的座標
+  const point = (deg, r) => {
+    const rad = deg * Math.PI / 180;
+    return [50 + r * Math.sin(rad), 50 - r * Math.cos(rad)].map(v => `${+v.toFixed(2)}%`);
+  };
+
+  const slicesHtml = Array.from({ length: sliceCount }, (_, i) => {
+    const startDeg = i * sliceAngle;
+    // 外緣每 30° 補一個點，半徑 75 才蓋得到長方形的四個角
+    const steps = Math.ceil(sliceAngle / 30);
+    const edge = Array.from({ length: steps + 1 }, (_, s) => point(startDeg + sliceAngle * s / steps, 75).join(" "));
+    const clipPath = `polygon(50% 50%, ${edge.join(", ")})`;
+    // 臉放在這一片的中線上：2 片時距中心 1/4 寬（整片蓋滿）；3 片以上往外推到 0.3 寬，蓋不到的角落露出成員色
+    const [x, y] = point(startDeg + sliceAngle / 2, sliceCount === 2 ? 25 : 30);
+    const slug = shown[i];
     const member = fixedEvents[slug];
     const emojiStr = member?.emoji || "✨";
     const avatarUrl = getMemberAvatarUrl(slug);
     const innerHtml = avatarUrl
       ? `<img class="avatar-img" src="${avatarUrl}" alt="${member?.name || slug}"${isStage ? "" : ' loading="lazy"'} width="240" height="240" onerror="handleAvatarError(this)" /><span class="avatar-emoji-fallback u-hidden">${emojiStr}</span>`
       : `<span class="avatar-emoji-fallback">${emojiStr}</span>`;
-    return `<span class="collage-cell" style="grid-column: span ${span}; --cell-color: ${getMemberColorVar(slug)};">${innerHtml}</span>`;
+    return `<span class="pizza-slice" style="clip-path: ${clipPath}; --x: ${x}; --y: ${y}; --size: ${sliceCount === 2 ? 150 : 100}%; --cell-color: ${getMemberColorVar(slug)};">${innerHtml}</span>`;
   }).join("");
 
   return `
-    <div class="member-avatar is-collage ${extraClass}" style="--collage-cols: ${gridCols}; --collage-rows: ${rows};">
-      ${cellsHtml}
+    <div class="member-avatar is-pizza ${extraClass}">
+      ${slicesHtml}
     </div>
   `;
 }
