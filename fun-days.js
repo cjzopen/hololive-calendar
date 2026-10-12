@@ -1,5 +1,5 @@
 // ----------------------------------------------------
-// Fun Days 特效（由 app.js 在今天沒有事件、且 fun-days.json 有對應節日時才載入）
+// Fun Days 特效（由 app.js 在 fun-days.json 有對應節日時才載入，不受其它事件影響）
 // 每個節日各自實作：style 是該特效的 CSS，start(layer, { day, close }) 把特效元素放進整頁圖層，
 // 可回傳清理函式；dismissible 的特效被關閉後當天不再出現
 // fun-days.json 裡沒寫 effect（或還沒有對應特效）的節日，改跳出提醒卡片

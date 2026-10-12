@@ -585,5 +585,13 @@
     "birthday": "06-28",
     "debut": "2026-09-25",
     "youtube": "SuzunaTsuzuri"
+  },
+  "gamers": {
+    "type": "group",
+    "name": "ホロライブゲーマーズ",
+    "emoji": "🎮",
+    "members": ["fubuki", "mio", "okayu", "korone"],
+    "formed": "2018-12-13",
+    "avatar": "manual"
   }
 }

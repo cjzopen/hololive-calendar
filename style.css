@@ -85,6 +85,7 @@
   --burinyan-color: #f352c0;
   --ai-koyori-color: #ffb6c1;
   --danchomu-color: var(--noel-color);
+  --gamers-color: var(--fubuki-color);
 
   /* Theme Design Tokens (odeholo.com) */
   --color-main: #FF6E9D;
@@ -975,6 +976,12 @@ input {
     }
   }
 
+  .stage-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+  }
+
   .stage-name {
     display: flex;
     flex-wrap: wrap;
@@ -1143,6 +1150,12 @@ input {
 
   &.is-sub {
     background-color: var(--color-sub);
+  }
+
+  /* 同一張 stage 有生日貼紙時，special 貼紙移到左下 */
+  &._alt {
+    right: auto;
+    left: -6px;
   }
 }
 
@@ -3098,6 +3111,7 @@ input {
       align-items: center;
     }
 
+    .stage-labels,
     .stage-name,
     .stage-meta {
       justify-content: center;

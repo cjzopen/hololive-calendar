@@ -28,10 +28,20 @@ function icon(name) {
   return `<i class="icon" data-lucide="${name}"></i>`;
 }
 
+// 與 app.js 的 getAnniversarySlots 相同：manual 角色沒有生日、或生日和出道同一天，出道日當作爆誕日
+function getDateRows(member) {
+  const isSeitan = member.avatar === "manual" && member.debut && (!member.birthday || member.birthday === member.debut.slice(5));
+  if (isSeitan) {
+    return [{ icon: "cake", title: "爆誕", date: member.debut }];
+  }
+  return [
+    { icon: "cake", title: "誕生日", date: member.birthday || "" },
+    { icon: "megaphone", title: "デビュー日", date: member.debut || "" }
+  ];
+}
+
 function renderStaticCard(slug, member) {
   const name = escapeHtml(member.name);
-  const birthday = member.birthday || "";
-  const debut = member.debut || "";
   const avatarHtml = member.youtube || member.avatar
     ? `<img class="avatar-img" src="images/avatars/${slug}.webp" alt="${name}" loading="lazy" width="240" height="240" />`
     : `<span class="avatar-emoji-fallback">${escapeHtml(member.emoji || "✨")}</span>`;
@@ -48,8 +58,7 @@ function renderStaticCard(slug, member) {
     `    </div>`,
     `  </div>`,
     `  <div class="member-card-dates">`,
-    `    <time datetime="${birthday}" title="誕生日">${icon("cake")}${birthday || "—"}</time>`,
-    `    <time datetime="${debut}" title="デビュー日">${icon("megaphone")}${debut || "—"}</time>`,
+    ...getDateRows(member).map(row => `    <time datetime="${row.date}" title="${row.title}">${icon(row.icon)}${row.date || "—"}</time>`),
     `  </div>`,
     `</article>`
   ].map(line => indent + line).join("\n");
@@ -62,10 +71,12 @@ if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
   process.exit(1);
 }
 
-const cardsHtml = Object.entries(fixedEvents).map(([slug, member]) => renderStaticCard(slug, member)).join("\n");
+// 團體（type: "group"）不是成員，不放進名冊
+const members = Object.entries(fixedEvents).filter(([, member]) => member.type !== "group");
+const cardsHtml = members.map(([slug, member]) => renderStaticCard(slug, member)).join("\n");
 const nextHtml = html.slice(0, startIndex + startMarker.length)
   + "\n" + cardsHtml + "\n" + indent
   + html.slice(endIndex);
 
 await writeFile(htmlPath, nextHtml);
-console.log(`${Object.keys(fixedEvents).length} 名のメンバーを index.html に書き込みました`);
+console.log(`${members.length} 名のメンバーを index.html に書き込みました`);

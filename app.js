@@ -42,7 +42,9 @@ const memberTimelineCount = document.getElementById("member-timeline-count");
 const memberEventsTimeline = document.getElementById("member-events-timeline");
 
 // App State
-let fixedEvents = {};
+let fixedEvents = {}; // 成員（fixed-events.json 中 type 不是 "group" 的項目）
+let fixedGroups = {}; // 團體（type: "group"），只用來產生結成記念日
+let anniversaryList = []; // 每年固定的紀念日（生日、出道、爆誕、結成）
 let specialEventsByDate = {};
 let allSpecialEventsList = [];
 let currentDate = new Date();
@@ -63,15 +65,15 @@ function iconHtml(name, extraClass = "") {
 // Member Avatars (static files in images/avatars/; youtube → tools/fetch-avatars.mjs, avatar: "manual" → hand-made)
 function getMemberAvatarUrl(character) {
   const slug = Array.isArray(character) ? character[0] : character;
-  const member = fixedEvents[slug];
+  const member = getEntry(slug);
   if (!member || !(member.youtube || member.avatar)) return null;
   return `images/avatars/${slug}.webp`;
 }
 
 function renderMemberAvatarHtml(character, emoji, extraClass = "") {
   const slug = Array.isArray(character) ? character[0] : character;
-  const emojiStr = emoji || fixedEvents[slug]?.emoji || "✨";
-  const name = fixedEvents[slug]?.name || slug || "";
+  const emojiStr = emoji || getEntry(slug)?.emoji || "✨";
+  const name = getEntry(slug)?.name || slug || "";
   const avatarUrl = getMemberAvatarUrl(slug);
 
   if (avatarUrl) {
@@ -117,7 +119,7 @@ function getTypeLabel(type) {
 }
 
 // Polaroid Photo Card (Today / Upcoming)
-function renderPhotoCardHtml({ character, name, emoji, event, type, dateObj, tagLabel, tagClass = "", isGroup = false }) {
+function renderPhotoCardHtml({ character, name, emoji, event, type, label, dateObj, tagLabel, tagClass = "", isGroup = false }) {
   const slug = Array.isArray(character) ? character[0] : character;
   const charColor = getMemberColorVar(slug);
   return `
@@ -131,10 +133,10 @@ function renderPhotoCardHtml({ character, name, emoji, event, type, dateObj, tag
         </div>
       </div>
       <div class="photo-card-body">
-        <span class="type-label is-${type}">${getTypeLabel(type)}</span>
+        <span class="type-label is-${type}">${label || getTypeLabel(type)}</span>
         <div class="photo-card-name">
           <span class="name-jp">${name || "hololive"}</span>
-          ${slug ? `<span class="name-en">${slug}</span>` : ""}
+          ${slug && !fixedGroups[slug] ? `<span class="name-en">${slug}</span>` : ""}
         </div>
         <p class="photo-card-event">${event}</p>
         <div class="photo-card-bottom">
@@ -156,7 +158,7 @@ Promise.all([
   fetch("fixed-events.json").then(res => res.json()),
   fetch("special-events.json").then(res => res.json())
 ]).then(([fixedData, specialData]) => {
-  fixedEvents = fixedData;
+  processFixedEvents(fixedData);
   processSpecialEvents(specialData);
   populateMemberSelect();
   setupEventListeners();
@@ -166,6 +168,66 @@ Promise.all([
 }).catch(err => {
   console.error("データ読み込み失敗:", err);
 });
+
+// Process Fixed Events：成員與團體分開存，紀念日先整理成一份清單
+function processFixedEvents(data) {
+  fixedEvents = {};
+  fixedGroups = {};
+  for (const [slug, info] of Object.entries(data)) {
+    if (info.type === "group") {
+      fixedGroups[slug] = info;
+    } else {
+      fixedEvents[slug] = info;
+    }
+  }
+
+  anniversaryList = [];
+  for (const [slug, info] of [...Object.entries(fixedEvents), ...Object.entries(fixedGroups)]) {
+    for (const slot of getAnniversarySlots(info)) {
+      if (!slot.date) continue;
+      anniversaryList.push({
+        ...slot,
+        character: slug,
+        name: info.name,
+        emoji: info.emoji,
+        // 團體：多人事件，不放愛心、不和成員個人事件合併
+        isGroup: info.type === "group",
+        members: info.members || null,
+        event: slot.type === "birthday" && slot.label === "誕生日" ? `${info.name} の誕生日` : `${info.name} ${slot.label}`
+      });
+    }
+  }
+}
+
+// 每年固定的紀念日欄位（date 可能是空的＝未登録）
+// - 一般成員：誕生日（MM-DD）＋ デビュー記念日（YYYY-MM-DD）
+// - manual 角色沒有生日、或生日和出道同一天：出道日當作「爆誕」，只算一個
+// - 團體：結成記念日
+function getAnniversarySlots(info) {
+  if (info.type === "group") {
+    return [{ type: "debut", label: "結成記念日", icon: "megaphone", date: info.formed || "" }];
+  }
+  const isSeitan = info.avatar === "manual" && info.debut && (!info.birthday || info.birthday === info.debut.slice(5));
+  if (isSeitan) {
+    return [{ type: "birthday", label: "爆誕", icon: "cake", date: info.debut }];
+  }
+  return [
+    { type: "birthday", label: "誕生日", icon: "cake", date: info.birthday || "" },
+    { type: "debut", label: "デビュー記念日", icon: "megaphone", date: info.debut || "" }
+  ];
+}
+
+// 成員或團體的資料
+function getEntry(slug) {
+  return fixedEvents[slug] || fixedGroups[slug];
+}
+
+// 事件是否和該成員有關（團體看 members）
+function eventHasMember(ev, slug) {
+  if (ev.members?.includes(slug)) return true;
+  if (Array.isArray(ev.character)) return ev.character.includes(slug);
+  return ev.character === slug;
+}
 
 // Process Special Events
 function processSpecialEvents(data) {
@@ -223,13 +285,12 @@ function getNextMemberEvent(slug) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const candidates = ["birthday", "debut"]
-    .filter(type => member[type])
-    .map(type => getNextOccurrence(member[type], today));
+  const candidates = anniversaryList
+    .filter(item => eventHasMember(item, slug))
+    .map(item => getNextOccurrence(item.date, today));
 
   for (const ev of allSpecialEventsList) {
-    const characters = Array.isArray(ev.character) ? ev.character : [ev.character];
-    if (!characters.includes(slug)) continue;
+    if (!eventHasMember(ev, slug)) continue;
     const [y, m, d] = ev.date.split("-").map(Number);
     const targetDate = new Date(y, m - 1, d);
     const diffDays = Math.round((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
@@ -521,8 +582,8 @@ window.addEventListener("pageshow", event => {
 
 // ----------------------------------------------------
 // Fun Days（每年固定的特別節日，整頁特效）
-// 今天沒有任何事件才載入 fun-days.json，有對應節日才載入 fun-days.min.js
-// 預覽：網址加 ?funday=10-04（略過「當天有事件」的判斷）；日期不固定的節日用名稱當 key，例如 ?funday=setsubun
+// 不管今天有沒有其它事件都會檢查；有對應節日才載入 fun-days.min.js
+// 預覽：網址加 ?test=10-04；日期不固定的節日用名稱當 key，例如 ?test=setsubun
 // ----------------------------------------------------
 let funDaysLoader = null;
 let funDaysScriptLoader = null;
@@ -536,13 +597,8 @@ function scheduleFunDayCheck() {
 }
 
 function checkFunDay() {
-  const previewKey = new URLSearchParams(location.search).get("funday");
+  const previewKey = new URLSearchParams(location.search).get("test");
   const today = new Date();
-  if (!previewKey && getEventsForDate(today).length > 0) {
-    window.stopFunDay?.();
-    return;
-  }
-
   const dateKey = formatDateString(today).slice(5);
   const key = previewKey || (dateKey === getSetsubunDateKey(today.getFullYear()) ? "setsubun" : dateKey);
   loadFunDays().then(days => {
@@ -643,6 +699,9 @@ function renderHomeView() {
   renderUpcomingSection();
 }
 
+// UPCOMING 顯示的天數範圍（推し成員不受限制）
+const UPCOMING_DAYS = 32;
+
 function buildUpcomingList() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -651,41 +710,25 @@ function buildUpcomingList() {
   // 推し（愛心）成員不受天數與件數限制，一定會出現在 UPCOMING
   const favorites = getFavorites();
 
-  // 1. Process Fixed Events (Birthday & Debut)
-  for (const [ch, info] of Object.entries(fixedEvents)) {
-    const isFav = favorites.includes(ch);
-    if (info.birthday) {
-      const occurrence = getNextOccurrence(info.birthday, today);
-      if (occurrence.diffDays >= 0 && (occurrence.diffDays <= 50 || isFav)) {
-        upcomingList.push({
-          type: "birthday",
-          character: ch,
-          name: info.name,
-          emoji: info.emoji,
-          event: `${info.name} の誕生日`,
-          dateObj: occurrence.targetDate,
-          dateStr: formatDateString(occurrence.targetDate),
-          diffDays: occurrence.diffDays,
-          isFavorite: isFav
-        });
-      }
-    }
-
-    if (info.debut) {
-      const occurrence = getNextOccurrence(info.debut, today);
-      if (occurrence.diffDays >= 0 && (occurrence.diffDays <= 50 || isFav)) {
-        upcomingList.push({
-          type: "debut",
-          character: ch,
-          name: info.name,
-          emoji: info.emoji,
-          event: `${info.name} デビュー記念日`,
-          dateObj: occurrence.targetDate,
-          dateStr: formatDateString(occurrence.targetDate),
-          diffDays: occurrence.diffDays,
-          isFavorite: isFav
-        });
-      }
+  // 1. Process Fixed Events (Birthday & Debut & 爆誕 & 結成)
+  for (const item of anniversaryList) {
+    const isFav = favorites.some(slug => eventHasMember(item, slug));
+    const occurrence = getNextOccurrence(item.date, today);
+    if (occurrence.diffDays <= UPCOMING_DAYS || isFav) {
+      upcomingList.push({
+        type: item.type,
+        label: item.label,
+        character: item.character,
+        members: item.members,
+        name: item.name,
+        emoji: item.emoji,
+        event: item.event,
+        dateObj: occurrence.targetDate,
+        dateStr: formatDateString(occurrence.targetDate),
+        diffDays: occurrence.diffDays,
+        isFavorite: isFav,
+        isGroup: item.isGroup
+      });
     }
   }
 
@@ -700,7 +743,7 @@ function buildUpcomingList() {
 
     const characters = Array.isArray(ev.character) ? ev.character : [ev.character];
     const isFav = characters.some(c => favorites.includes(c));
-    if (diffDays >= 0 && (diffDays <= 60 || isFav)) {
+    if (diffDays >= 0 && (diffDays <= UPCOMING_DAYS || isFav)) {
       const firstChar = Array.isArray(ev.character) ? ev.character[0] : ev.character;
       const charName = Array.isArray(ev.character)
         ? ev.character.map(c => fixedEvents[c]?.name || c).join(" / ")
@@ -753,33 +796,60 @@ function renderWaveTextHtml(text) {
   return [...text].map((ch, i) => `<span style="--i: ${i};">${ch === " " ? "&nbsp;" : ch}</span>`).join("");
 }
 
-function renderStageDecoHtml(type) {
-  if (type === "birthday") {
-    return `
-      <span class="stage-party-hat" aria-hidden="true"><i class="hat-pom"></i></span>
-      <span class="stage-sticker" aria-hidden="true">${iconHtml("cake", "is-solo")}</span>
-    `;
-  }
-  if (type === "debut") {
-    return `<span class="stage-rosette" aria-hidden="true"><b>祝</b></span>`;
-  }
-  return `<span class="stage-sticker is-sub" aria-hidden="true">${iconHtml("mic-vocal", "is-solo")}</span>`;
+// 同一個裝飾位置只放一個：生日的蛋糕貼紙在右下，同時有 special 時麥克風移到左下
+function renderStageDecoHtml(types) {
+  const hasBirthday = types.includes("birthday");
+  return [
+    hasBirthday ? `<span class="stage-party-hat" aria-hidden="true"><i class="hat-pom"></i></span>` : "",
+    hasBirthday ? `<span class="stage-sticker" aria-hidden="true">${iconHtml("cake", "is-solo")}</span>` : "",
+    types.includes("debut") ? `<span class="stage-rosette" aria-hidden="true"><b>祝</b></span>` : "",
+    types.includes("special") ? `<span class="stage-sticker is-sub${hasBirthday ? " _alt" : ""}" aria-hidden="true">${iconHtml("mic-vocal", "is-solo")}</span>` : ""
+  ].join("");
 }
 
-function renderStageHtml(item) {
+const stageTypeOrder = ["birthday", "debut", "special"];
+
+// 同一成員同一天的個人事件合併成一張 stage；多人活動、團體各自獨立
+function groupStageItems(events) {
+  const stages = [];
+  const byMember = new Map();
+  for (const item of events) {
+    const slug = item.character;
+    if (item.isGroup || !slug || Array.isArray(slug)) {
+      stages.push([item]);
+      continue;
+    }
+    if (byMember.has(slug)) {
+      byMember.get(slug).push(item);
+    } else {
+      const items = [item];
+      byMember.set(slug, items);
+      stages.push(items);
+    }
+  }
+  return stages.map(items => items.sort((a, b) => stageTypeOrder.indexOf(a.type) - stageTypeOrder.indexOf(b.type)));
+}
+
+function renderStageHtml(items) {
+  // 排序後第一個為主（生日 > 出道 > special），決定 kicker 與彩帶
+  const item = items[0];
+  const types = items.map(i => i.type);
   const slug = item.character;
   const kicker = (stageKickers[item.type] || stageKickers.special)[Math.min(item.diffDays, 2)];
   const countdown = item.diffDays === 0 ? "本日！" : getCountdownBadge(item.diffDays).label;
   const oshiBubblesHtml = item.emoji
     ? ["_a", "_b", "_c"].map(pos => `<span class="stage-bubble ${pos}" aria-hidden="true">${item.emoji}</span>`).join("")
     : "";
+  const eventText = items.length === 1
+    ? item.event
+    : items.map(i => i.type === "special" ? i.event : (i.label || getTypeLabel(i.type))).join("・");
 
   return `
     <article class="today-stage is-${item.type} is-day-${item.diffDays}" data-member="${slug || ""}" style="--stage-color: ${getMemberColorVar(slug)};">
       <div class="stage-bg" aria-hidden="true"><span class="stage-rays"></span></div>
-      ${item.type === "special" ? `<span class="stage-spot _l" aria-hidden="true"></span><span class="stage-spot _r" aria-hidden="true"></span>` : ""}
+      ${types.includes("special") ? `<span class="stage-spot _l" aria-hidden="true"></span><span class="stage-spot _r" aria-hidden="true"></span>` : ""}
       <div class="stage-confetti">
-        ${item.type === "birthday" ? ["_l", "_r"].map(pos => `<button type="button" class="stage-popper ${pos}" aria-label="クラッカーを鳴らす" title="クリックでお祝い！" onclick="fireStageConfetti(this.closest('.today-stage'), true)">${iconHtml("party-popper", "is-solo")}</button>`).join("") : ""}
+        ${types.includes("birthday") ? ["_l", "_r"].map(pos => `<button type="button" class="stage-popper ${pos}" aria-label="クラッカーを鳴らす" title="クリックでお祝い！" onclick="fireStageConfetti(this.closest('.today-stage'), true)">${iconHtml("party-popper", "is-solo")}</button>`).join("") : ""}
       </div>
 
       <div class="stage-avatar-wrap" role="button" tabindex="0" title="クリックでお祝い！"
@@ -787,18 +857,20 @@ function renderStageHtml(item) {
            onkeydown="if (event.key === 'Enter') fireStageConfetti(this.closest('.today-stage'), true)">
         <span class="stage-ring" aria-hidden="true"></span>
         ${renderMemberAvatarHtml(slug, item.emoji, "stage-avatar")}
-        ${renderStageDecoHtml(item.type)}
+        ${renderStageDecoHtml(types)}
         ${oshiBubblesHtml}
       </div>
 
       <div class="stage-info">
         <p class="stage-kicker">${renderWaveTextHtml(kicker)}</p>
-        <span class="type-label is-${item.type}">${getTypeLabel(item.type)}</span>
+        <div class="stage-labels">
+          ${items.map(i => `<span class="type-label is-${i.type}">${i.label || getTypeLabel(i.type)}</span>`).join("")}
+        </div>
         <h4 class="stage-name">
           <span class="name-jp">${item.name || "hololive"}</span>
-          ${slug ? `<span class="name-en">${slug}</span>` : ""}
+          ${slug && !Array.isArray(slug) && !fixedGroups[slug] ? `<span class="name-en">${slug}</span>` : ""}
         </h4>
-        <p class="stage-event">${item.event}</p>
+        <p class="stage-event">${eventText}</p>
         <div class="stage-meta">
           <time class="stage-date">${formatDisplayDate(item.dateObj)}</time>
           <span class="stage-countdown">${countdown}</span>
@@ -848,7 +920,7 @@ function preloadTomorrowAnimation() {
 }
 
 function renderTodayStage(featuredEvents) {
-  const stagesHtml = featuredEvents.map(renderStageHtml);
+  const stagesHtml = groupStageItems(featuredEvents).map(renderStageHtml);
   const isTomorrow = featuredEvents[0].diffDays === 1;
 
   const stageArea = stagesHtml.length > 1
@@ -1161,12 +1233,7 @@ function renderCalendarView() {
 
     // Apply active member filter if set
     if (activeMemberFilter) {
-      dayEvents = dayEvents.filter(ev => {
-        if (Array.isArray(ev.character)) {
-          return ev.character.includes(activeMemberFilter);
-        }
-        return ev.character === activeMemberFilter;
-      });
+      dayEvents = dayEvents.filter(ev => eventHasMember(ev, activeMemberFilter));
     }
 
     const filteredEvents = dayEvents.filter(ev => enabledTypes.includes(ev.type));
@@ -1249,10 +1316,7 @@ function renderSelectedDayPanel(shouldAnimate = false) {
 
   let events = getEventsForDate(selectedDate);
   if (activeMemberFilter) {
-    events = events.filter(ev => {
-      if (Array.isArray(ev.character)) return ev.character.includes(activeMemberFilter);
-      return ev.character === activeMemberFilter;
-    });
+    events = events.filter(ev => eventHasMember(ev, activeMemberFilter));
   }
 
   const listHtml = events.length === 0
@@ -1278,11 +1342,12 @@ function renderPanelEventItemHtml(ev) {
   const charColor = getMemberColorVar(firstChar);
   const memberName = Array.isArray(ev.name) ? ev.name.join("、") : (ev.name || "");
 
+  // 多人活動、團體：列出成員
+  const pillMembers = ev.members || (Array.isArray(ev.character) && ev.character.length > 1 ? ev.character : null);
   let membersContent = "";
-  if (Array.isArray(ev.character) && ev.character.length > 1) {
-    const pills = ev.character.map((ch, idx) => {
-      const name = Array.isArray(ev.name) ? ev.name[idx] : ev.name;
-      return `<span class="mini-member-pill" style="--pill-color: ${getMemberColorVar(ch)};" onclick="event.stopPropagation(); openMemberSpotlight('${ch}')">${name}</span>`;
+  if (pillMembers) {
+    const pills = pillMembers.map(ch => {
+      return `<span class="mini-member-pill" style="--pill-color: ${getMemberColorVar(ch)};" onclick="event.stopPropagation(); openMemberSpotlight('${ch}')">${fixedEvents[ch]?.name ?? ch}</span>`;
     }).join("");
     membersContent = `<div class="item-members-list">${pills}</div>`;
   }
@@ -1291,7 +1356,7 @@ function renderPanelEventItemHtml(ev) {
     <div class="panel-event-item" style="--item-color: ${charColor};" onclick="goToMemberOrCalendar('${firstChar || ""}')">
       ${renderMemberAvatarHtml(firstChar, ev.emoji, "is-thumb")}
       <div class="item-body">
-        <span class="type-label is-${ev.type}">${getTypeLabel(ev.type)}</span>
+        <span class="type-label is-${ev.type}">${ev.label || getTypeLabel(ev.type)}</span>
         <div class="item-member-name">${memberName}</div>
         ${ev.type === "special" ? `<div class="item-event-title">${ev.event}</div>` : ""}
         ${membersContent}
@@ -1340,45 +1405,16 @@ function getEventsForDate(date) {
 
   const matches = [];
 
-  // 1. Fixed Events
-  for (const [ch, info] of Object.entries(fixedEvents)) {
-    if (info.birthday) {
-      const [bm, bd] = info.birthday.split("-").map(Number);
-      if (bm === m && bd === d) {
-        matches.push({
-          type: "birthday",
-          character: ch,
-          emoji: info.emoji,
-          name: info.name,
-          event: `${info.name} の誕生日`
-        });
-      }
-      // Leap year 2/29 handling on non-leap years
-      if (bm === 2 && bd === 29 && m === 2 && d === 28) {
-        const isLeap = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
-        if (!isLeap) {
-          matches.push({
-            type: "birthday",
-            character: ch,
-            emoji: info.emoji,
-            name: info.name,
-            event: `${info.name} の誕生日 (平年)`
-          });
-        }
-      }
+  // 1. Fixed Events (Birthday & Debut & 爆誕 & 結成)
+  const isLeap = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+  for (const item of anniversaryList) {
+    const [am, ad] = item.date.slice(-5).split("-").map(Number);
+    if (am === m && ad === d) {
+      matches.push(item);
     }
-
-    if (info.debut) {
-      const [dm, dd] = info.debut.slice(-5).split("-").map(Number);
-      if (dm === m && dd === d) {
-        matches.push({
-          type: "debut",
-          character: ch,
-          emoji: info.emoji,
-          name: info.name,
-          event: `${info.name} デビュー記念日`
-        });
-      }
+    // Leap year 2/29 handling on non-leap years
+    if (am === 2 && ad === 29 && m === 2 && d === 28 && !isLeap) {
+      matches.push({ ...item, event: `${item.event} (平年)` });
     }
   }
 
@@ -1460,8 +1496,7 @@ function renderMembersList() {
           ${renderHeartButtonHtml(member.slug)}
         </div>
         <div class="member-card-dates">
-          <time datetime="${member.birthday || ""}">${iconHtml("cake")}${member.birthday || "—"}</time>
-          <time datetime="${member.debut || ""}">${iconHtml("megaphone")}${member.debut || "—"}</time>
+          ${getAnniversarySlots(member).map(slot => `<time datetime="${slot.date}" title="${slot.label}">${iconHtml(slot.icon)}${slot.date || "—"}</time>`).join("")}
         </div>
       </article>
     `;
@@ -1471,18 +1506,12 @@ function renderMembersList() {
 function getMemberNextCountdown(member, today) {
   let closestDays = 999;
   let closestType = "";
-  if (member.birthday) {
-    const occ = getNextOccurrence(member.birthday, today);
+  for (const slot of getAnniversarySlots(member)) {
+    if (!slot.date) continue;
+    const occ = getNextOccurrence(slot.date, today);
     if (occ.diffDays < closestDays) {
       closestDays = occ.diffDays;
-      closestType = "birthday";
-    }
-  }
-  if (member.debut) {
-    const occ = getNextOccurrence(member.debut, today);
-    if (occ.diffDays < closestDays) {
-      closestDays = occ.diffDays;
-      closestType = "debut";
+      closestType = slot.type;
     }
   }
   if (closestDays === 0) {
@@ -1533,23 +1562,31 @@ function renderMemberSpotlightContent(slug) {
 
   const colorVar = getMemberColorVar(slug);
 
-  // Calculate Countdown for Birthday & Debut
-  let birthdayCountdownText = "未登録";
-  if (member.birthday) {
-    const bOccurrence = getNextOccurrence(member.birthday, today);
-    birthdayCountdownText = bOccurrence.diffDays === 0
-      ? `${iconHtml("party-popper")}きょうがお誕生日です！`
-      : `次の誕生日まで あと ${bOccurrence.diffDays} 日`;
-  }
-
-  let debutCountdownText = "未登録";
-  if (member.debut) {
-    const dOccurrence = getNextOccurrence(member.debut, today);
-    const years = dOccurrence.targetDate.getFullYear() - Number(member.debut.slice(0, 4));
-    debutCountdownText = dOccurrence.diffDays === 0
-      ? `${iconHtml("megaphone")}きょうがデビュー ${years} 周年です！`
-      : `${years} 周年まで あと ${dOccurrence.diffDays} 日`;
-  }
+  // Calculate Countdown for Birthday & Debut（manual 角色為爆誕）
+  const dateCardsHtml = getAnniversarySlots(member).map(slot => {
+    let countdownText = "未登録";
+    if (slot.date) {
+      const occ = getNextOccurrence(slot.date, today);
+      if (slot.label === "誕生日") {
+        countdownText = occ.diffDays === 0
+          ? `${iconHtml("party-popper")}きょうがお誕生日です！`
+          : `次の誕生日まで あと ${occ.diffDays} 日`;
+      } else {
+        const years = occ.targetDate.getFullYear() - Number(slot.date.slice(0, 4));
+        const prefix = slot.label.replace("記念日", "");
+        countdownText = occ.diffDays === 0
+          ? `${iconHtml(slot.type === "birthday" ? "party-popper" : "megaphone")}きょうが${prefix} ${years} 周年です！`
+          : `${years} 周年まで あと ${occ.diffDays} 日`;
+      }
+    }
+    return `
+        <div class="member-date-card">
+          <span class="date-card-label">${iconHtml(slot.icon)}${slot.label}</span>
+          <time class="date-card-date" datetime="${slot.date}">${slot.date || "—"}</time>
+          <div class="date-card-countdown">${countdownText}</div>
+        </div>
+    `;
+  }).join("");
 
   if (memberSpotlightCard) {
     memberSpotlightCard.style.setProperty("--member-color", colorVar);
@@ -1567,16 +1604,7 @@ function renderMemberSpotlightContent(slug) {
         </div>
       </div>
       <div class="member-countdown-grid">
-        <div class="member-date-card">
-          <span class="date-card-label">${iconHtml("cake")}誕生日</span>
-          <time class="date-card-date" datetime="${member.birthday || ""}">${member.birthday || "—"}</time>
-          <div class="date-card-countdown">${birthdayCountdownText}</div>
-        </div>
-        <div class="member-date-card">
-          <span class="date-card-label">${iconHtml("megaphone")}デビュー記念日</span>
-          <time class="date-card-date" datetime="${member.debut || ""}">${member.debut || "—"}</time>
-          <div class="date-card-countdown">${debutCountdownText}</div>
-        </div>
+        ${dateCardsHtml}
       </div>
     `;
   }
