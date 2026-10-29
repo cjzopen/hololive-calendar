@@ -9,11 +9,42 @@
       "date": "2025-01-18"
     }
   ],
+  "Hoshimachi Suisei 日本武道館 Live “SuperNova”": [
+    {
+      "type": "special",
+      "character": "suisei",
+      "date": "2025-02-01"
+    }
+  ],
   "1st Solo Live「FBKINGDOM “ANTHEM”」": [
     {
       "type": "special",
       "character": "fubuki",
-      "date": "2025-02-12"
+      "date": "2025-02-13"
+    }
+  ],
+  "Mori Calliope 2nd Solo Concert “Grimoire”": [
+    {
+      "type": "special",
+      "character": "calli",
+      "date": "2025-02-27"
+    }
+  ],
+  "6th fes. Color Rise Harmony": [
+    {
+      "type": "special",
+      "character": "",
+      "date": [
+        "2025-03-08",
+        "2025-03-09"
+      ]
+    }
+  ],
+  "猫又おかゆ 2nd Live.「ぺるそにゃ～りすぺくと」": [
+    {
+      "type": "special",
+      "character": "okayu",
+      "date": "2025-05-28"
     }
   ],
   "hololive GAMERS fes. 超超超超ゲーマーズ2": [
@@ -159,6 +190,17 @@
       "date": "2026-02-21"
     }
   ],
+  "7th fes. Ridin’ on Dreams": [
+    {
+      "type": "special",
+      "character": "",
+      "date": [
+        "2026-03-06",
+        "2026-03-07",
+        "2026-03-08"
+      ]
+    }
+  ],
   "\"Drawn to Dawn\"": [
     {
       "type": "special",
@@ -170,6 +212,60 @@
         "2026-03-27",
         "2026-03-28"
       ]
+    }
+  ],
+  "獅白杯 – オフライン –": [
+    {
+      "type": "special",
+      "character": [
+        "botan",
+        "laplus"
+      ],
+      "date": [
+        "2026-04-11",
+        "2026-04-12"
+      ]
+    }
+  ],
+  "秘密結社holoX Live 2026「First MISSION」": [
+    {
+      "type": "special",
+      "character": [
+        "laplus",
+        "lui",
+        "koyori",
+        "iroha"
+      ],
+      "date": "2026-04-29"
+    }
+  ],
+  "hololive English 4th Concert -Serendipity-": [
+    {
+      "type": "special",
+      "character": "",
+      "date": [
+        "2026-07-03",
+        "2026-07-04"
+      ]
+    }
+  ],
+  "桃鈴ねね 1st Live「花咲く＊ねねねねねねねね超開花！」": [
+    {
+      "type": "special",
+      "character": "nene",
+      "date": "2026-07-29"
+    }
+  ],
+  "ReGLOSS3周年記念おしゃべりフェス": [
+    {
+      "type": "special",
+      "character": [
+        "kanade",
+        "ririka",
+        "raden",
+        "hajime"
+      ],
+      "date": "2026-09-20"
     }
   ],
   "ねぽらぼ×holoX「ねぽっくす!」": [
@@ -206,6 +302,43 @@
       "date": "2026-11-07"
     }
   ],
+  "ホロライブわちゃわちゃ学園祭": [
+    {
+      "type": "special",
+      "character": [
+        "choco", "noel", "lamy", "nene",
+        "polka", "riona", "chihaya", "vivi"
+      ],
+      "date": "2026-11-14"
+    },
+    {
+      "type": "special",
+      "character": [
+        "roboco", "aki", "matsuri", "watame",
+        "laplus", "koyori", "ririka", "raden"
+      ],
+      "date": "2026-11-15"
+    }
+  ],
+  "ReGLOSS AR LIVE「X-ReCHORD」": [
+    {
+      "type": "special",
+      "character": [
+        "kanade",
+        "ririka",
+        "raden",
+        "hajime"
+      ],
+      "date": "2026-11-29"
+    }
+  ],
+  "Hakos Baelz 1st Concert “REGALIA”": [
+    {
+      "type": "special",
+      "character": "bae",
+      "date": "2026-12-01"
+    }
+  ],
   "鷹嶺ルイ1stライブ “REBELLION”": [
     {
       "type": "special",
@@ -218,6 +351,35 @@
       "type": "special",
       "character": "koyori",
       "date": "2026-12-22"
+    }
+  ],
+  "hololive RECORDS MUSIC STAGE 2027": [
+    {
+      "type": "special",
+      "character": [
+        "azki", "bae", "miko",
+        "kanade", "ririka", "raden", "hajime"
+      ],
+      "date": "2027-01-09"
+    },
+    {
+      "type": "special",
+      "character": [
+        "watame", "kobo", "fubuki",
+        "riona", "niko", "su", "chihaya", "vivi"
+      ],
+      "date": "2027-01-10"
+    }
+  ],
+  "8th fes. Brand-New Fanfare": [
+    {
+      "type": "special",
+      "character": "",
+      "date": [
+        "2027-03-12",
+        "2027-03-13",
+        "2027-03-14"
+      ]
     }
   ]
 }
