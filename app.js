@@ -1343,7 +1343,7 @@ function renderCalendarView() {
       filteredEvents.slice(0, 3).forEach(ev => {
         const dot = document.createElement("span");
         dot.className = "mobile-dot";
-        dot.style.setProperty("--dot-color", getMemberColorVar(ev.character));
+        dot.style.setProperty("--dot-color", getEventColorVar(ev));
         mobileDots.appendChild(dot);
       });
       numberRow.appendChild(mobileDots);
@@ -1357,8 +1357,12 @@ function renderCalendarView() {
     filteredEvents.slice(0, 2).forEach(ev => {
       const chip = document.createElement("div");
       chip.className = "mini-event-chip";
-      chip.style.setProperty("--chip-color", getMemberColorVar(ev.character));
-      const name = ev.name || ev.event || "";
+      chip.style.setProperty("--chip-color", getEventColorVar(ev));
+      // 多人活動：「第一人 他N人」
+      const multi = getMultiCharacters(ev);
+      const name = multi
+        ? `${fixedEvents[multi[0]]?.name ?? multi[0]} 他${multi.length - 1}人`
+        : (ev.name || ev.event || "");
       chip.innerHTML = `<span class="chip-emoji">${iconHtml(typeIcons[ev.type] || "sparkles", "is-solo")}</span><span class="chip-text">${name}</span>`;
       badgesWrapper.appendChild(chip);
     });
@@ -1432,11 +1436,12 @@ function renderSelectedDayPanel(shouldAnimate = false) {
 
 function renderPanelEventItemHtml(ev) {
   const firstChar = Array.isArray(ev.character) ? ev.character[0] : ev.character;
-  const charColor = getMemberColorVar(firstChar);
+  const charColor = getEventColorVar(ev);
+  const multi = getMultiCharacters(ev);
   const memberName = Array.isArray(ev.name) ? ev.name.join("、") : (ev.name || "");
 
   // 多人活動、團體：列出成員
-  const pillMembers = ev.members || (Array.isArray(ev.character) && ev.character.length > 1 ? ev.character : null);
+  const pillMembers = ev.members || multi;
   let membersContent = "";
   if (pillMembers) {
     const pills = pillMembers.map(ch => {
@@ -1447,11 +1452,12 @@ function renderPanelEventItemHtml(ev) {
 
   return `
     <div class="panel-event-item" style="--item-color: ${charColor};" onclick="goToMemberOrCalendar('${firstChar || ""}')">
-      ${renderMemberAvatarHtml(firstChar, ev.emoji, "is-thumb")}
+      ${multi ? renderCollageAvatarHtml(multi, "is-thumb") : renderMemberAvatarHtml(firstChar, ev.emoji, "is-thumb")}
       <div class="item-body">
         <span class="type-label is-${ev.type}">${ev.label || getTypeLabel(ev.type)}</span>
+        ${multi ? `<div class="item-member-name">${ev.event}</div>` : `
         <div class="item-member-name">${memberName}</div>
-        ${ev.type === "special" ? `<div class="item-event-title">${ev.event}</div>` : ""}
+        ${ev.type === "special" ? `<div class="item-event-title">${ev.event}</div>` : ""}`}
         ${membersContent}
       </div>
     </div>
@@ -1536,6 +1542,16 @@ function getEventsForDate(date) {
   });
 
   return [...matches, ...specials];
+}
+
+// 多人 special 活動：回傳成員清單，否則 null
+function getMultiCharacters(ev) {
+  return Array.isArray(ev.character) && ev.character.length > 1 ? ev.character : null;
+}
+
+// 多人活動用主色，不用第一個人的成員色
+function getEventColorVar(ev) {
+  return getMultiCharacters(ev) ? "var(--color-main)" : getMemberColorVar(ev.character);
 }
 
 function getMemberColorVar(character) {
