@@ -56,6 +56,7 @@
     "youtube": "ShirakamiFubuki"
   },
   "kurosama": {
+    "parent": "fubuki",
     "name": "黒様",
     "emoji": "🥤",
     "birthday": "09-06",
@@ -63,6 +64,7 @@
     "avatar": "manual"
   },
   "burinyan": {
+    "parent": "fubuki",
     "name": "ホワイトブリニャン",
     "emoji": "",
     "debut": "2021-04-19",
@@ -145,6 +147,14 @@
     "debut": "2019-07-17",
     "youtube": "usadapekora"
   },
+  "pekomama": {
+    "parent": "pekora",
+    "name": "ぺこーらマミー",
+    "emoji": "👯",
+    "birthday": "11-02",
+    "debut": "2024-04-01",
+    "avatar": "manual"
+  },
   "flare": {
     "name": "不知火フレア",
     "emoji": "🔥",
@@ -160,6 +170,7 @@
     "youtube": "ShiroganeNoel"
   },
   "danchomu": {
+    "parent": "noel",
     "name": "だんちょむ",
     "emoji": "",
     "birthday": "10-11",
@@ -265,6 +276,7 @@
     "youtube": "HakuiKoyori"
   },
   "ai-koyori": {
+    "parent": "koyori",
     "name": "AIこより",
     "emoji": "",
     "birthday": "09-25",

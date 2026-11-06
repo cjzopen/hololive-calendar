@@ -71,8 +71,8 @@ if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
   process.exit(1);
 }
 
-// 團體（type: "group"）不是成員，不放進名冊
-const members = Object.entries(fixedEvents).filter(([, member]) => member.type !== "group");
+// 團體（type: "group"）與關聯衍生角色（有 parent）不放進成員名冊
+const members = Object.entries(fixedEvents).filter(([, member]) => member.type !== "group" && !member.parent);
 const cardsHtml = members.map(([slug, member]) => renderStaticCard(slug, member)).join("\n");
 const nextHtml = html.slice(0, startIndex + startMarker.length)
   + "\n" + cardsHtml + "\n" + indent

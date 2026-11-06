@@ -42,7 +42,8 @@ const memberTimelineCount = document.getElementById("member-timeline-count");
 const memberEventsTimeline = document.getElementById("member-events-timeline");
 
 // App State
-let fixedEvents = {}; // 成員（fixed-events.json 中 type 不是 "group" 的項目）
+let fixedEvents = {}; // 正式成員（fixed-events.json 中沒有 type: "group" 也沒有 parent 的項目）
+let fixedSubCharacters = {}; // 關聯／衍生角色（有 parent 欄位，如黒様、だんちょむ、ぺこーらマミー）
 let fixedGroups = {}; // 團體（type: "group"），只用來產生結成記念日
 let anniversaryList = []; // 每年固定的紀念日（生日、出道、爆誕、結成）
 let specialEventsByDate = {};
@@ -168,10 +169,10 @@ window.handleAvatarError = function(img) {
   img.parentElement?.querySelector(".avatar-emoji-fallback")?.classList.remove("u-hidden");
 };
 
-// Heart Button (推しマーク): the only card action
+// Heart Button (推しマーク): the only card action（關聯角色連動其本體成員的愛心）
 function renderHeartButtonHtml(character) {
-  const slug = Array.isArray(character) ? character[0] : character;
-  if (!slug || !fixedEvents[slug]) return "";
+  const slug = getPrimaryMemberSlug(character);
+  if (!slug) return "";
   const member = fixedEvents[slug];
   const isFav = isFavorite(slug);
   return `
@@ -239,33 +240,36 @@ Promise.all([
   populateMemberSelect();
   setupEventListeners();
   setupDayDialog();
-  renderApp();
   restoreSavedState();
 }).catch(err => {
   console.error("データ読み込み失敗:", err);
 });
 
-// Process Fixed Events：成員與團體分開存，紀念日先整理成一份清單
+// Process Fixed Events：正式成員、關聯衍生角色、團體分開存，紀念日先整理成一份清單
 function processFixedEvents(data) {
   fixedEvents = {};
+  fixedSubCharacters = {};
   fixedGroups = {};
   for (const [slug, info] of Object.entries(data)) {
     if (info.type === "group") {
       fixedGroups[slug] = info;
+    } else if (info.parent) {
+      fixedSubCharacters[slug] = info;
     } else {
       fixedEvents[slug] = info;
     }
   }
 
   anniversaryList = [];
-  for (const [slug, info] of [...Object.entries(fixedEvents), ...Object.entries(fixedGroups)]) {
+  for (const [slug, info] of [...Object.entries(fixedEvents), ...Object.entries(fixedSubCharacters), ...Object.entries(fixedGroups)]) {
     for (const slot of getAnniversarySlots(info)) {
       if (!slot.date) continue;
       anniversaryList.push({
         ...slot,
         character: slug,
+        parent: info.parent || null,
         name: info.name,
-        emoji: info.emoji,
+        emoji: info.emoji || (info.parent ? fixedEvents[info.parent]?.emoji : ""),
         // 團體：多人事件，不放愛心、不和成員個人事件合併
         isGroup: info.type === "group",
         members: info.members || null,
@@ -293,16 +297,33 @@ function getAnniversarySlots(info) {
   ];
 }
 
-// 成員或團體的資料
+// 成員、關聯角色或團體的資料
 function getEntry(slug) {
-  return fixedEvents[slug] || fixedGroups[slug];
+  return fixedEvents[slug] || fixedSubCharacters[slug] || fixedGroups[slug];
 }
 
-// 事件是否和該成員有關（團體看 members）
+// 取得對應的正式成員 slug（關聯衍生角色會回傳其 parent 成員）
+function getPrimaryMemberSlug(character) {
+  const slug = Array.isArray(character) ? character[0] : character;
+  if (!slug) return null;
+  if (fixedEvents[slug]) return slug;
+  const parent = fixedSubCharacters[slug]?.parent;
+  return parent && fixedEvents[parent] ? parent : null;
+}
+
+// 取得該正式成員底下的所有關聯衍生角色
+function getSubCharactersForMember(slug) {
+  return Object.entries(fixedSubCharacters)
+    .filter(([, info]) => info.parent === slug)
+    .map(([subSlug, info]) => ({ slug: subSlug, ...info }));
+}
+
+// 事件是否和該成員有關（含團體 members 與關聯衍生角色 parent）
 function eventHasMember(ev, slug) {
+  if (ev.parent === slug) return true;
   if (ev.members?.includes(slug)) return true;
   if (Array.isArray(ev.character)) return ev.character.includes(slug);
-  return ev.character === slug;
+  return ev.character === slug || getPrimaryMemberSlug(ev.character) === slug;
 }
 
 // Process Special Events
@@ -376,19 +397,17 @@ function getNextMemberEvent(slug) {
   return candidates.sort((a, b) => a.diffDays - b.diffDays)[0] || null;
 }
 
-function applyCalendarMemberFilter(slug) {
-  activeMemberFilter = slug;
-  sessionStorage.setItem("holokoyomi_active_member", slug);
-  updateSidebarMemberStatus();
-
-  // 跳到該成員下一個即將到來的事件所在月份
+function jumpToMemberNextEvent(slug) {
   const nextEvent = getNextMemberEvent(slug);
   if (nextEvent) {
     currentDate = new Date(nextEvent.targetDate.getFullYear(), nextEvent.targetDate.getMonth(), 1);
     selectedDate = new Date(nextEvent.targetDate);
   }
+}
 
-  executeTransition(() => renderCalendarView());
+function applyCalendarMemberFilter(slug) {
+  if (!fixedEvents[slug]) return;
+  navigateTo("calendar", slug, { jumpCalendarToMember: true });
 }
 
 // Setup Event Listeners
@@ -400,6 +419,24 @@ function setupEventListeners() {
       switchView(targetView);
       closeMobileSidebar();
     });
+  });
+
+  window.addEventListener("popstate", event => {
+    const state = event.state;
+    const { view, member } = state && state.view ? {
+      view: state.view === "calendar" || state.view === "members" ? state.view : "home",
+      member: state.member && fixedEvents[state.member] ? state.member : null
+    } : parseRouteFromUrl();
+
+    if (state && state.calendarYear !== undefined && state.calendarMonth !== undefined) {
+      currentDate = new Date(state.calendarYear, state.calendarMonth, 1);
+      const parsedSelected = parseTestDate(state.selectedDate);
+      if (parsedSelected) selectedDate = parsedSelected;
+    } else if (view === "calendar" && member) {
+      jumpToMemberNextEvent(member);
+    }
+
+    applyRouteState(view, member, { scrollY: state?.scrollY ?? 0 });
   });
 
   // Mobile Menu Toggle
@@ -479,20 +516,17 @@ function setupEventListeners() {
 
   if (memberBackBtn) {
     memberBackBtn.onclick = () => {
-      executeTransition(() => {
-        activeMemberFilter = null;
-        sessionStorage.setItem("holokoyomi_active_member", "");
-        updateSidebarMemberStatus();
-        memberProfileSubview.classList.add("u-hidden");
-        membersListSubview.classList.remove("u-hidden");
-        renderMembersList();
-      });
+      navigateTo("members", null);
     };
   }
 
   if (memberViewCalendarBtn) {
     memberViewCalendarBtn.onclick = () => {
-      switchView("calendar");
+      if (activeMemberFilter) {
+        applyCalendarMemberFilter(activeMemberFilter);
+      } else {
+        switchView("calendar");
+      }
     };
   }
 }
@@ -502,75 +536,177 @@ function closeMobileSidebar() {
   sidebarOverlay.classList.remove("open");
 }
 
-function switchView(viewName) {
-  if (activeView === viewName && viewName !== "members") return;
+// 網址 query 路由：
+// - 首頁：不帶 view / member（保持乾淨網址，並保留 ?test= 等其它參數）
+// - 月曆：?view=calendar（篩選成員時加 &member=slug）
+// - 成員一覧：?view=members
+// - 成員個人頁：?view=members&member=slug（若網址只有 ?member=slug 也視為成員個人頁）
+function parseRouteFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const rawView = params.get("view");
+  const rawMember = params.get("member");
+  const member = getPrimaryMemberSlug(rawMember);
 
-  sessionStorage.setItem("holokoyomi_active_view", viewName);
+  if (rawView === "calendar") {
+    return { view: "calendar", member };
+  }
+  if (rawView === "members" || member) {
+    return { view: "members", member };
+  }
+  return { view: "home", member: null };
+}
+
+function buildRouteUrl(view, member) {
+  const url = new URL(window.location.href);
+  url.hash = "";
+  url.searchParams.delete("view");
+  url.searchParams.delete("member");
+
+  if (view === "calendar") {
+    url.searchParams.set("view", "calendar");
+    if (member && fixedEvents[member]) {
+      url.searchParams.set("member", member);
+    }
+  } else if (view === "members") {
+    url.searchParams.set("view", "members");
+    if (member && fixedEvents[member]) {
+      url.searchParams.set("member", member);
+    }
+  }
+
+  return url.pathname + url.search;
+}
+
+function createHistoryState(scrollY = window.scrollY) {
+  return {
+    view: activeView,
+    member: activeMemberFilter,
+    scrollY,
+    calendarYear: currentDate.getFullYear(),
+    calendarMonth: currentDate.getMonth(),
+    selectedDate: formatDateString(selectedDate)
+  };
+}
+
+function syncViewDom(scrollY = 0) {
+  navItems.forEach(item => {
+    item.classList.toggle("active", item.dataset.view === activeView);
+  });
+  pageViews.forEach(view => {
+    view.classList.toggle("active", view.id === `view-${activeView}`);
+  });
+  if (activeView === "members") {
+    const showProfile = Boolean(activeMemberFilter && fixedEvents[activeMemberFilter]);
+    membersListSubview.classList.toggle("u-hidden", showProfile);
+    memberProfileSubview.classList.toggle("u-hidden", !showProfile);
+  }
+  window.scrollTo({ top: scrollY, behavior: "instant" });
+}
+
+function applyRouteState(view, member, { scrollY = 0 } = {}) {
+  closeMobileSidebar();
+  closeDayDialog();
+
+  activeView = view;
+  activeMemberFilter = member && fixedEvents[member] ? member : null;
+  updateSidebarMemberStatus();
 
   executeTransition(() => {
-    activeView = viewName;
-    navItems.forEach(item => {
-      item.classList.toggle("active", item.dataset.view === viewName);
-    });
-    pageViews.forEach(view => {
-      view.classList.toggle("active", view.id === `view-${viewName}`);
-    });
-
-    // 切換視圖時一律回到頁面頂端
-    window.scrollTo({ top: 0, behavior: "instant" });
-
-    if (viewName === "calendar") {
+    if (activeView === "calendar") {
       renderCalendarView();
-    } else if (viewName === "members") {
+    } else if (activeView === "members") {
       if (activeMemberFilter) {
-        membersListSubview.classList.add("u-hidden");
-        memberProfileSubview.classList.remove("u-hidden");
         renderMemberSpotlightContent(activeMemberFilter);
       } else {
-        membersListSubview.classList.remove("u-hidden");
-        memberProfileSubview.classList.add("u-hidden");
         renderMembersList();
       }
-    } else if (viewName === "home") {
+    } else {
       renderHomeView();
     }
+    syncViewDom(scrollY);
   });
 }
 
-function restoreSavedState() {
-  if (window.location.hash) {
-    try {
-      history.replaceState(null, "", window.location.pathname + window.location.search);
-    } catch (e) {}
+function navigateTo(view, member = null, { replace = false, jumpCalendarToMember = false } = {}) {
+  const nextView = view === "calendar" || view === "members" ? view : "home";
+  const nextMember = nextView !== "home" && member && fixedEvents[member] ? member : null;
+
+  if (!replace && activeView === nextView && activeMemberFilter === nextMember) {
+    return;
   }
 
-  // 舊版把頁面狀態存在 localStorage，清掉避免殘留
-  localStorage.removeItem("holokoyomi_active_view");
-  localStorage.removeItem("holokoyomi_active_member");
+  // 離開目前畫面前，把捲動位置與月曆年月存進當前 history state，按上一頁時才能還原
+  try {
+    history.replaceState(createHistoryState(window.scrollY), "", window.location.pathname + window.location.search);
+  } catch (e) {}
 
-  // 頁面狀態只存在 sessionStorage：重新整理保留，關閉分頁後重開回到首頁
-  const savedView = sessionStorage.getItem("holokoyomi_active_view") || "home";
-  const savedMember = sessionStorage.getItem("holokoyomi_active_member");
+  if (nextView === "calendar" && nextMember && jumpCalendarToMember) {
+    jumpToMemberNextEvent(nextMember);
+  }
 
-  if (savedView === "members" && savedMember && fixedEvents[savedMember]) {
-    openMemberSpotlight(savedMember);
-  } else if (savedMember && fixedEvents[savedMember] && savedView === "calendar") {
-    activeMemberFilter = savedMember;
-    updateSidebarMemberStatus();
-    switchView("calendar");
-  } else {
-    switchView(savedView);
+  applyRouteState(nextView, nextMember, { scrollY: 0 });
+
+  try {
+    const nextUrl = buildRouteUrl(nextView, nextMember);
+    if (replace) {
+      history.replaceState(createHistoryState(0), "", nextUrl);
+    } else {
+      history.pushState(createHistoryState(0), "", nextUrl);
+    }
+  } catch (e) {}
+}
+
+function switchView(viewName) {
+  if (viewName === "home") {
+    navigateTo("home", null);
+  } else if (viewName === "calendar") {
+    navigateTo("calendar", activeMemberFilter, {
+      jumpCalendarToMember: Boolean(activeMemberFilter && activeView !== "calendar")
+    });
+  } else if (viewName === "members") {
+    const nextMember = activeView === "members" ? null : activeMemberFilter;
+    navigateTo("members", nextMember);
   }
 }
 
-function clearMemberFocus() {
-  activeMemberFilter = null;
-  sessionStorage.setItem("holokoyomi_active_member", "");
-  updateSidebarMemberStatus();
-  if (calendarMemberFilterBanner) {
-    calendarMemberFilterBanner.classList.add("u-hidden");
+function restoreSavedState() {
+  // 舊版把頁面狀態存在 localStorage / sessionStorage，清掉避免殘留
+  localStorage.removeItem("holokoyomi_active_view");
+  localStorage.removeItem("holokoyomi_active_member");
+  sessionStorage.removeItem("holokoyomi_active_view");
+  sessionStorage.removeItem("holokoyomi_active_member");
+
+  if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
   }
-  executeTransition(() => renderCalendarView());
+
+  const { view, member } = parseRouteFromUrl();
+  const state = history.state;
+  const hasMatchingState = state && state.view === view && (state.member || null) === member;
+
+  activeView = view;
+  activeMemberFilter = member;
+
+  if (hasMatchingState && state.calendarYear !== undefined && state.calendarMonth !== undefined) {
+    currentDate = new Date(state.calendarYear, state.calendarMonth, 1);
+    const parsedSelected = parseTestDate(state.selectedDate);
+    if (parsedSelected) selectedDate = parsedSelected;
+  } else if (view === "calendar" && member) {
+    jumpToMemberNextEvent(member);
+  }
+
+  const initialScrollY = hasMatchingState ? (state.scrollY ?? 0) : 0;
+  renderApp();
+  syncViewDom(initialScrollY);
+
+  try {
+    history.replaceState(createHistoryState(initialScrollY), "", buildRouteUrl(view, member));
+  } catch (e) {}
+}
+
+function clearMemberFocus() {
+  const targetView = activeView === "members" || activeView === "calendar" ? activeView : "home";
+  navigateTo(targetView, null);
 }
 
 function animateCalendarMonth(direction) {
@@ -604,6 +740,9 @@ function renderApp() {
   renderHomeView();
   renderCalendarView();
   renderMembersList();
+  if (activeView === "members" && activeMemberFilter) {
+    renderMemberSpotlightContent(activeMemberFilter);
+  }
   updateSidebarMemberStatus();
   renderedDateKey = formatDateString(new Date());
   scheduleMidnightRollover();
@@ -1575,10 +1714,15 @@ function renderMembersList() {
 
   const filtered = membersArray.filter(m => {
     if (!keyword) return true;
+    const subs = getSubCharactersForMember(m.slug);
     return (
       (m.name && m.name.toLowerCase().includes(keyword)) ||
       (m.slug && m.slug.toLowerCase().includes(keyword)) ||
-      (m.emoji && m.emoji.includes(keyword))
+      (m.emoji && m.emoji.includes(keyword)) ||
+      subs.some(sub =>
+        (sub.name && sub.name.toLowerCase().includes(keyword)) ||
+        (sub.slug && sub.slug.toLowerCase().includes(keyword))
+      )
     );
   });
 
@@ -1634,32 +1778,37 @@ function getMemberNextCountdown(member, today) {
   }
 }
 
-// 點選成員後，畫面「以該成員為主」
+// 點選成員後，畫面「以該成員為主」（若點選關聯衍生角色，導向本體成員）
 function openMemberSpotlight(slug) {
-  const member = fixedEvents[slug];
-  if (!member) return;
+  const targetSlug = getPrimaryMemberSlug(slug);
+  if (!targetSlug) return;
+  navigateTo("members", targetSlug);
+}
 
-  activeMemberFilter = slug;
-  sessionStorage.setItem("holokoyomi_active_view", "members");
-  sessionStorage.setItem("holokoyomi_active_member", slug);
-  updateSidebarMemberStatus();
-
-  executeTransition(() => {
-    // 切換至成員檢視
-    activeView = "members";
-    navItems.forEach(item => {
-      item.classList.toggle("active", item.dataset.view === "members");
-    });
-    pageViews.forEach(view => {
-      view.classList.toggle("active", view.id === "view-members");
-    });
-
-    // 隱藏成員列表，顯示個人專屬畫面
-    membersListSubview.classList.add("u-hidden");
-    memberProfileSubview.classList.remove("u-hidden");
-
-    renderMemberSpotlightContent(slug);
-  });
+function renderDateCardItemHtml(slot, today, prefixName = "") {
+  let countdownText = "未登録";
+  if (slot.date) {
+    const occ = getNextOccurrence(slot.date, today);
+    if (slot.label === "誕生日") {
+      countdownText = occ.diffDays === 0
+        ? `${iconHtml("party-popper")}きょうがお誕生日です！`
+        : `次の誕生日まで あと ${occ.diffDays} 日`;
+    } else {
+      const years = occ.targetDate.getFullYear() - Number(slot.date.slice(0, 4));
+      const prefix = slot.label.replace("記念日", "");
+      countdownText = occ.diffDays === 0
+        ? `${iconHtml(slot.type === "birthday" ? "party-popper" : "megaphone")}きょうが${prefix} ${years} 周年です！`
+        : `${years} 周年まで あと ${occ.diffDays} 日`;
+    }
+  }
+  const labelText = prefixName ? `${prefixName} ${slot.label}` : slot.label;
+  return `
+      <div class="member-date-card">
+        <span class="date-card-label">${iconHtml(slot.icon)}${labelText}</span>
+        <time class="date-card-date" datetime="${slot.date}">${slot.date || "—"}</time>
+        <div class="date-card-countdown">${countdownText}</div>
+      </div>
+  `;
 }
 
 function renderMemberSpotlightContent(slug) {
@@ -1671,31 +1820,14 @@ function renderMemberSpotlightContent(slug) {
 
   const colorVar = getMemberColorVar(slug);
 
-  // Calculate Countdown for Birthday & Debut（manual 角色為爆誕）
-  const dateCardsHtml = getAnniversarySlots(member).map(slot => {
-    let countdownText = "未登録";
-    if (slot.date) {
-      const occ = getNextOccurrence(slot.date, today);
-      if (slot.label === "誕生日") {
-        countdownText = occ.diffDays === 0
-          ? `${iconHtml("party-popper")}きょうがお誕生日です！`
-          : `次の誕生日まで あと ${occ.diffDays} 日`;
-      } else {
-        const years = occ.targetDate.getFullYear() - Number(slot.date.slice(0, 4));
-        const prefix = slot.label.replace("記念日", "");
-        countdownText = occ.diffDays === 0
-          ? `${iconHtml(slot.type === "birthday" ? "party-popper" : "megaphone")}きょうが${prefix} ${years} 周年です！`
-          : `${years} 周年まで あと ${occ.diffDays} 日`;
-      }
-    }
-    return `
-        <div class="member-date-card">
-          <span class="date-card-label">${iconHtml(slot.icon)}${slot.label}</span>
-          <time class="date-card-date" datetime="${slot.date}">${slot.date || "—"}</time>
-          <div class="date-card-countdown">${countdownText}</div>
-        </div>
-    `;
-  }).join("");
+  // 本體成員與旗下關聯衍生角色的紀念日倒數卡片
+  const mainCards = getAnniversarySlots(member).map(slot => renderDateCardItemHtml(slot, today));
+  const subCards = getSubCharactersForMember(slug).flatMap(sub =>
+    getAnniversarySlots(sub)
+      .filter(slot => slot.date)
+      .map(slot => renderDateCardItemHtml(slot, today, sub.name))
+  );
+  const dateCardsHtml = [...mainCards, ...subCards].join("");
 
   if (memberSpotlightCard) {
     memberSpotlightCard.style.setProperty("--member-color", colorVar);
@@ -1759,13 +1891,12 @@ function renderMemberSpotlightContent(slug) {
       }).join("");
     }
   }
-
-  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function goToMemberOrCalendar(character) {
-  if (character && fixedEvents[character]) {
-    openMemberSpotlight(character);
+  const targetSlug = getPrimaryMemberSlug(character);
+  if (targetSlug) {
+    openMemberSpotlight(targetSlug);
   } else {
     switchView("calendar");
   }

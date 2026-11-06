@@ -392,6 +392,161 @@
           document.removeEventListener("keydown", onKeydown);
         };
       }
+    },
+
+    // 11/04 いい推しの日 / いいおしりの日：
+    // 畫面緩緩飄起使用者「推し」成員的推しマーク，右下角卡片顯示自己的推し頭像與「いい推しの日」；
+    // 按下 ✕ 關閉（結束＝おわり）時，卡片翻轉為桃鈴ねね的「おしり♡」關台彩蛋後淡出
+    oshi: {
+      dismissible: true,
+      style: `
+        .fun-oshi-item {
+          position: absolute;
+          bottom: 0;
+          left: var(--x);
+          font-size: var(--size);
+          line-height: 1;
+          animation: fun-oshi-rise var(--dur) linear var(--delay) infinite backwards;
+          will-change: transform;
+        }
+
+        .fun-oshi-sway {
+          display: block;
+          opacity: var(--alpha);
+          animation: fun-oshi-sway var(--sway-dur) ease-in-out var(--delay) infinite alternate backwards;
+          will-change: transform;
+        }
+
+        .fun-day-notice.is-oshiri {
+          animation: fun-oshiri-flip .48s var(--ease-pop) both;
+
+          .fun-day-notice-title {
+            font-size: 1.55rem;
+            letter-spacing: .04em;
+            color: color-mix(in srgb, var(--nene-color, var(--color-main)) 75%, black);
+          }
+        }
+
+        @keyframes fun-oshi-rise {
+          from { transform: translate3d(0, 12vh, 0); }
+          to   { transform: translate3d(var(--drift), -112vh, 0); }
+        }
+
+        @keyframes fun-oshi-sway {
+          from { transform: translate3d(calc(var(--sway) * -1), 0, 0) rotate(calc(var(--tilt) * -1)); }
+          to   { transform: translate3d(var(--sway), 0, 0) rotate(var(--tilt)); }
+        }
+
+        @keyframes fun-oshiri-flip {
+          0%   { transform: scale(.88) rotateY(90deg); }
+          60%  { transform: scale(1.06) rotateY(-8deg) rotate(2deg); }
+          100% { transform: none; }
+        }
+      `,
+      start(layer, { day, close }) {
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
+        const count = isMobile ? 8 : 12;
+        const rand = (min, max) => min + Math.random() * (max - min);
+
+        const getActiveFavs = () =>
+          (typeof getFavorites === "function" ? getFavorites() : []).filter(slug => fixedEvents?.[slug]);
+
+        const getPoolEmojis = () => {
+          const favs = getActiveFavs();
+          const list = favs.flatMap(slug => {
+            const raw = fixedEvents[slug]?.emoji;
+            return typeof splitEmojis === "function" ? splitEmojis(raw) : [raw];
+          }).filter(Boolean);
+          return list.length > 0 ? list : ["💖", "🍑"];
+        };
+
+        const initialPool = getPoolEmojis();
+        for (let i = 0; i < count; i++) {
+          const item = document.createElement("div");
+          item.className = "fun-oshi-item";
+          item.style.setProperty("--x", `${((i + Math.random()) / count) * 100}%`);
+          item.style.setProperty("--size", `${rand(24, 38) * (isMobile ? .85 : 1)}px`);
+          item.style.setProperty("--alpha", rand(.7, .92).toFixed(2));
+          item.style.setProperty("--dur", `${rand(14, 22)}s`);
+          item.style.setProperty("--delay", `${(i / count) * 10 + rand(0, 2)}s`);
+          item.style.setProperty("--drift", `${rand(-10, 10)}vw`);
+          item.style.setProperty("--sway", `${rand(20, 48)}px`);
+          item.style.setProperty("--sway-dur", `${rand(2.6, 4.2)}s`);
+          item.style.setProperty("--tilt", `${rand(10, 22)}deg`);
+
+          const sway = document.createElement("span");
+          sway.className = "fun-oshi-sway";
+          sway.textContent = initialPool[i % initialPool.length];
+          item.append(sway);
+          layer.append(item);
+        }
+
+        // 右下角卡片：優先顯示使用者自己的推し；按下 ✕ 時翻轉成ねね的「おしり♡」才結束
+        const notice = document.createElement("div");
+        notice.className = "fun-day-notice";
+        notice.setAttribute("role", "status");
+
+        const avatar = document.createElement("div");
+        avatar.className = "fun-day-notice-avatar";
+
+        const favs = getActiveFavs();
+        if (favs.length === 1) {
+          notice.style.setProperty("--notice-color", `var(--${favs[0]}-color, var(--color-main))`);
+          avatar.innerHTML = renderMemberAvatarHtml(favs[0], fixedEvents[favs[0]]?.emoji);
+        } else if (favs.length > 1 && typeof renderCollageAvatarHtml === "function") {
+          notice.style.setProperty("--notice-color", "var(--color-main)");
+          avatar.innerHTML = renderCollageAvatarHtml(favs);
+        } else {
+          notice.style.setProperty("--notice-color", "var(--color-main)");
+          avatar.innerHTML = renderMemberAvatarHtml("", "💖");
+        }
+
+        const text = document.createElement("div");
+        const label = document.createElement("span");
+        label.className = "fun-day-notice-label";
+        label.textContent = "TODAY IS";
+        const title = document.createElement("span");
+        title.className = "fun-day-notice-title";
+        title.textContent = day.name;
+        text.append(label, title);
+
+        const closeBtn = document.createElement("button");
+        closeBtn.type = "button";
+        closeBtn.className = "fun-day-notice-close";
+        closeBtn.setAttribute("aria-label", "閉じる");
+        closeBtn.textContent = "×";
+
+        notice.append(avatar, text, closeBtn);
+        document.body.append(notice);
+
+        let isEnding = false;
+        let endTimerId = null;
+
+        closeBtn.addEventListener("click", () => {
+          if (isEnding) return;
+          isEnding = true;
+          closeBtn.remove();
+          layer.classList.add("is-leaving");
+
+          notice.classList.remove("is-oshiri");
+          void notice.offsetWidth;
+          notice.classList.add("is-oshiri");
+          notice.style.setProperty("--notice-color", "var(--nene-color, var(--color-main))");
+          avatar.innerHTML = renderMemberAvatarHtml("nene", "🍑");
+          label.textContent = "11.04 いいおしりの日";
+          title.textContent = "おしり♡";
+
+          endTimerId = setTimeout(() => {
+            notice.classList.add("is-leaving");
+            endTimerId = setTimeout(close, 300);
+          }, 1350);
+        });
+
+        return () => {
+          clearTimeout(endTimerId);
+          notice.remove();
+        };
+      }
     }
   };
 
@@ -561,7 +716,7 @@
   }
 
   function startEffect(key, effect, day) {
-    setStyle(BASE_STYLE + effect.style);
+    setStyle(BASE_STYLE + NOTICE_STYLE + effect.style);
 
     const layer = document.createElement("div");
     layer.className = `fun-day-layer is-${day.effect}`;
