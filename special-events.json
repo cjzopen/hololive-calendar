@@ -1,4 +1,379 @@
 {
+  "AZKi 1st Live『The Shitest Start』": [
+    {
+      "type": "special",
+      "character": "azki",
+      "date": "2019-05-19"
+    }
+  ],
+  "AZKi 2nd Live『A GOODDAY TO DiE』": [
+    {
+      "type": "special",
+      "character": "azki",
+      "date": "2019-07-27"
+    }
+  ],
+  "AZKi 3rd LiVE『レペゼンエンタス』": [
+    {
+      "type": "special",
+      "character": "azki",
+      "date": "2019-09-22"
+    }
+  ],
+  "ときのそら 1stワンマンライブ「Dream!」": [
+    {
+      "type": "special",
+      "character": "sora",
+      "date": "2019-10-06"
+    }
+  ],
+  "AZKi 4th LiVE『REPEAT THiS LiFE WiTH U』": [
+    {
+      "type": "special",
+      "character": "azki",
+      "date": "2019-12-29"
+    }
+  ],
+  "1st fes. ノンストップ・ストーリー": [
+    {
+      "type": "special",
+      "character": "",
+      "date": "2020-01-24"
+    }
+  ],
+  "AZKi 5th LIVE『R.I.P AZHOOD』": [
+    {
+      "type": "special",
+      "character": "azki",
+      "date": "2020-07-25"
+    }
+  ],
+  "湊あくあ アニバーサリーライブ2020『あくあ色すーぱー☆どり～む♪』": [
+    {
+      "type": "special",
+      "character": "aqua",
+      "date": "2020-08-21"
+    }
+  ],
+  "SorAZ Special Live「刹那的クロニクル」": [
+    {
+      "type": "special",
+      "character": [
+        "sora",
+        "azki"
+      ],
+      "date": "2020-09-26"
+    }
+  ],
+  "ときのそら 2nd LIVE「パラレルタイム」": [
+    {
+      "type": "special",
+      "character": "sora",
+      "date": "2020-11-29"
+    }
+  ],
+  "AZKi 6th LiVE『Re:Creating world』": [
+    {
+      "type": "special",
+      "character": "azki",
+      "date": "2020-12-06"
+    }
+  ],
+  "2nd fes. Beyond the Stage": [
+    {
+      "type": "special",
+      "character": "",
+      "date": [
+        "2020-12-21",
+        "2020-12-22"
+      ]
+    }
+  ],
+  "hololive IDOL PROJECT 1st Live.『Bloom,』": [
+    {
+      "type": "special",
+      "character": "",
+      "date": "2021-02-17"
+    }
+  ],
+  "AZKi 7th LiVE『Stand at the crossroads』": [
+    {
+      "type": "special",
+      "character": "azki",
+      "date": "2021-04-11"
+    }
+  ],
+  "hololive 1st Generation 3rd Anniversary LIVE「from 1st」": [
+    {
+      "type": "special",
+      "character": [
+        "mel",
+        "fubuki",
+        "matsuri",
+        "aki",
+        "haato"
+      ],
+      "date": "2021-05-28"
+    }
+  ],
+  "AZKi 8th LiVE『Rewind & Reunion』": [
+    {
+      "type": "special",
+      "character": "azki",
+      "date": "2021-09-12"
+    }
+  ],
+  "角巻わため 1st Live「わためぇ Night Fever!! in Zepp Tokyo」": [
+    {
+      "type": "special",
+      "character": "watame",
+      "date": "2021-10-12"
+    }
+  ],
+  "Hoshimachi Suisei 1st Solo Live “STELLAR into the GALAXY”": [
+    {
+      "type": "special",
+      "character": "suisei",
+      "date": "2021-10-21"
+    }
+  ],
+  "HOLOLIVE FANTASY 1st LIVE「FAN FUN ISLAND」": [
+    {
+      "type": "special",
+      "character": [
+        "pekora",
+        "rushia",
+        "flare",
+        "noel",
+        "marine"
+      ],
+      "date": "2021-11-25"
+    }
+  ],
+  "ときのそら Theatrical Cover Live「Role:Play」": [
+    {
+      "type": "special",
+      "character": "sora",
+      "date": "2022-01-22"
+    }
+  ],
+  "湊あくあ ワンマンライブ2022「あくあ色 in わんだ～☆らんど♪」": [
+    {
+      "type": "special",
+      "character": "aqua",
+      "date": "2022-01-28"
+    }
+  ],
+  "3rd fes. Link Your Wish": [
+    {
+      "type": "special",
+      "character": "",
+      "date": [
+        "2022-03-19",
+        "2022-03-20"
+      ]
+    }
+  ],
+  "Mori Calliope Major Debut Concert “New Underworld Order”": [
+    {
+      "type": "special",
+      "character": "calli",
+      "date": "2022-07-18"
+    }
+  ],
+  "猫又おかゆ 1st Live.『ぽいずにゃ〜しんどろーむ』": [
+    {
+      "type": "special",
+      "character": "okayu",
+      "date": "2022-09-30"
+    }
+  ],
+  "ときのそら 5th Anniversary Live『宇宙と時空のミルキーウェイ』": [
+    {
+      "type": "special",
+      "character": "sora",
+      "date": "2022-11-19"
+    }
+  ],
+  "Hoshimachi Suisei 2nd Solo Live “Shout in Crisis”": [
+    {
+      "type": "special",
+      "character": "suisei",
+      "date": "2023-01-28"
+    }
+  ],
+  "4th fes. Our Bright Parade": [
+    {
+      "type": "special",
+      "character": "",
+      "date": [
+        "2023-03-18",
+        "2023-03-19"
+      ]
+    }
+  ],
+  "hololive English 1st Concert -Connect the World-": [
+    {
+      "type": "special",
+      "character": "",
+      "date": "2023-07-02"
+    }
+  ],
+  "hololive 5th Generation Live “Twinkle 4 You”": [
+    {
+      "type": "special",
+      "character": [
+        "lamy",
+        "nene",
+        "botan",
+        "polka"
+      ],
+      "date": "2023-07-07"
+    }
+  ],
+  "ホロライブ・サマー2023 3DLIVE「Splash Party!」": [
+    {
+      "type": "special",
+      "character": "",
+      "date": [
+        "2023-08-26",
+        "2023-08-27"
+      ]
+    }
+  ],
+  "Blue Journey 1st Live「夜明けのうた」": [
+    {
+      "type": "special",
+      "character": "",
+      "date": "2023-09-13"
+    }
+  ],
+  "Tokoyami Towa 1st Solo Live “Break your ×××”": [
+    {
+      "type": "special",
+      "character": "towa",
+      "date": "2023-10-13"
+    }
+  ],
+  "1st兎田ぺこらいぶ「うさぎ the MEGAMI!!」": [
+    {
+      "type": "special",
+      "character": "pekora",
+      "date": "2023-12-06"
+    }
+  ],
+  "SorAZ Major Debut Live「First Gravity」": [
+    {
+      "type": "special",
+      "character": [
+        "sora",
+        "azki"
+      ],
+      "date": "2024-01-27"
+    }
+  ],
+  "角巻わため 2nd Live「わためぇ Night Fever!! in TOKYO GARDEN THEATER」": [
+    {
+      "type": "special",
+      "character": "watame",
+      "date": "2024-01-31"
+    }
+  ],
+  "5th fes. Capture the Moment": [
+    {
+      "type": "special",
+      "character": "",
+      "date": [
+        "2024-03-16",
+        "2024-03-17"
+      ]
+    }
+  ],
+  "ときのそら 6th Anniversary Party「Keep Shinin'」": [
+    {
+      "type": "special",
+      "character": "sora",
+      "date": "2024-04-06"
+    }
+  ],
+  "hololive Meet SUPER KARAOKE PARTY @ TAIPEI 2024": [
+    {
+      "type": "special",
+      "character": [
+        "gura",
+        "kobo",
+        "irys",
+        "bae",
+        "fuwawa",
+        "mococo"
+      ],
+      "date": "2024-05-11"
+    }
+  ],
+  "hololive GAMERS fes. 超超超超ゲーマーズ": [
+    {
+      "type": "special",
+      "character": [
+        "fubuki",
+        "mio",
+        "okayu",
+        "korone"
+      ],
+      "date": [
+        "2024-05-25",
+        "2024-05-26"
+      ]
+    }
+  ],
+  "AZKi Major Debut LiVE「声音エントロピー」": [
+    {
+      "type": "special",
+      "character": "azki",
+      "date": [
+        "2024-08-03",
+        "2024-09-17",
+        "2024-09-18"
+      ]
+    }
+  ],
+  "hololive English 2nd Concert -Breaking Dimensions-": [
+    {
+      "type": "special",
+      "character": "",
+      "date": [
+        "2024-08-24",
+        "2024-08-25"
+      ]
+    }
+  ],
+  "Sakura Miko 1st Live “flower fantasista!”": [
+    {
+      "type": "special",
+      "character": "miko",
+      "date": "2024-10-26"
+    }
+  ],
+  "Hoshimachi Suisei Live Tour 2024 “Spectra of Nova”": [
+    {
+      "type": "special",
+      "character": "suisei",
+      "date": [
+        "2024-11-14",
+        "2024-12-10",
+        "2024-12-28"
+      ]
+    }
+  ],
+  "宝鐘マリン1stライブ「Ahoy!! キミたちみんなパイレーツ♡」": [
+    {
+      "type": "special",
+      "character": "marine",
+      "date": [
+        "2024-12-07",
+        "2024-12-08"
+      ]
+    }
+  ],
   "hololive Meet @ TAIPEI": [
     {
       "type": "special",
@@ -62,6 +437,99 @@
       ]
     }
   ],
+  "hololive STAGE World Tour '25 -Synchronize!-": [
+    {
+      "type": "special",
+      "character": [
+        "nene",
+        "ollie",
+        "calli",
+        "irys",
+        "nerissa",
+        "kronii",
+        "bae"
+      ],
+      "date": "2025-07-12"
+    },
+    {
+      "type": "special",
+      "character": [
+        "nene",
+        "ollie",
+        "calli",
+        "irys",
+        "nerissa",
+        "sora",
+        "miko"
+      ],
+      "date": "2025-07-27"
+    },
+    {
+      "type": "special",
+      "character": [
+        "nene",
+        "ollie",
+        "calli",
+        "irys",
+        "nerissa",
+        "fuwawa",
+        "mococo"
+      ],
+      "date": "2025-08-03"
+    },
+    {
+      "type": "special",
+      "character": [
+        "nene",
+        "ollie",
+        "calli",
+        "irys",
+        "nerissa",
+        "haato",
+        "matsuri"
+      ],
+      "date": "2025-08-22"
+    },
+    {
+      "type": "special",
+      "character": [
+        "nene",
+        "ollie",
+        "calli",
+        "irys",
+        "nerissa",
+        "azki",
+        "kanata"
+      ],
+      "date": "2025-12-06"
+    },
+    {
+      "type": "special",
+      "character": [
+        "nene",
+        "ollie",
+        "calli",
+        "irys",
+        "nerissa",
+        "risu",
+        "elizabeth"
+      ],
+      "date": "2025-12-20"
+    },
+    {
+      "type": "special",
+      "character": [
+        "nene",
+        "ollie",
+        "calli",
+        "irys",
+        "nerissa",
+        "fubuki",
+        "marine"
+      ],
+      "date": "2026-02-27"
+    }
+  ],
   "1st Solo Live「LOCK ON」": [
     {
       "type": "special",
@@ -76,18 +544,6 @@
       "date": [
         "2025-08-23",
         "2025-08-24"
-      ]
-    }
-  ],
-  "Taipei Dome hololive night": [
-    {
-      "type": "special",
-      "character": [
-        "fuwawa","mococo","gigi","raora"
-      ],
-      "date": [
-        "2025-08-29",
-        "2025-08-30"
       ]
     }
   ],
@@ -254,6 +710,19 @@
       "type": "special",
       "character": "nene",
       "date": "2026-07-29"
+    }
+  ],
+  "HOSHIMACHI SUISEI ARENA TOUR 2026 “Once Upon a Stellar”": [
+    {
+      "type": "special",
+      "character": "suisei",
+      "date": [
+        "2026-09-08",
+        "2026-09-09",
+        "2026-10-21",
+        "2026-11-07",
+        "2026-11-12"
+      ]
     }
   ],
   "ReGLOSS3周年記念おしゃべりフェス": [
