@@ -65,6 +65,64 @@
       "date": "2020-09-26"
     }
   ],
+  "Cinderella switch ～ふたりでみるホロライブ～": [
+    {
+      "type": "special",
+      "character": [
+        "marine",
+        "kanata"
+      ],
+      "date": "2020-09-27"
+    },
+    {
+      "type": "special",
+      "character": [
+        "roboco",
+        "towa"
+      ],
+      "date": "2020-10-24"
+    },
+    {
+      "type": "special",
+      "character": [
+        "flare",
+        "watame"
+      ],
+      "date": "2020-11-28"
+    },
+    {
+      "type": "special",
+      "character": [
+        "matsuri",
+        "luna"
+      ],
+      "date": "2021-03-27"
+    },
+    {
+      "type": "special",
+      "character": [
+        "fubuki",
+        "mio"
+      ],
+      "date": "2021-04-24"
+    },
+    {
+      "type": "special",
+      "character": [
+        "lamy",
+        "botan"
+      ],
+      "date": "2021-05-29"
+    },
+    {
+      "type": "special",
+      "character": [
+        "nene",
+        "polka"
+      ],
+      "date": "2021-06-26"
+    }
+  ],
   "ときのそら 2nd LIVE「パラレルタイム」": [
     {
       "type": "special",
@@ -114,6 +172,48 @@
         "haato"
       ],
       "date": "2021-05-28"
+    }
+  ],
+  "Cinderella switch -new act- ～ふたりでつくるホロライブ～": [
+    {
+      "type": "special",
+      "character": [
+        "subaru",
+        "choco"
+      ],
+      "date": "2021-07-31"
+    },
+    {
+      "type": "special",
+      "character": [
+        "ayame",
+        "noel"
+      ],
+      "date": "2021-08-28"
+    },
+    {
+      "type": "special",
+      "character": [
+        "miko",
+        "suisei"
+      ],
+      "date": "2021-09-25"
+    },
+    {
+      "type": "special",
+      "character": [
+        "kanata",
+        "towa"
+      ],
+      "date": "2021-10-30"
+    },
+    {
+      "type": "special",
+      "character": [
+        "mel",
+        "aki"
+      ],
+      "date": "2021-11-27"
     }
   ],
   "AZKi 8th LiVE『Rewind & Reunion』": [
@@ -181,6 +281,40 @@
       "date": "2022-07-18"
     }
   ],
+  "Cinderella switch ～みんなでつくるホロライブ～": [
+    {
+      "type": "special",
+      "character": [
+        "watame",
+        "botan"
+      ],
+      "date": "2022-07-30"
+    },
+    {
+      "type": "special",
+      "character": [
+        "matsuri",
+        "fubuki"
+      ],
+      "date": "2022-08-27"
+    },
+    {
+      "type": "special",
+      "character": [
+        "miko",
+        "haato"
+      ],
+      "date": "2022-09-24"
+    },
+    {
+      "type": "special",
+      "character": [
+        "polka",
+        "flare"
+      ],
+      "date": "2022-10-29"
+    }
+  ],
   "猫又おかゆ 1st Live.『ぽいずにゃ〜しんどろーむ』": [
     {
       "type": "special",
@@ -195,11 +329,55 @@
       "date": "2022-11-19"
     }
   ],
+  "Holoearth Protolive #1": [
+    {
+      "type": "special",
+      "character": [
+        "azki",
+        "calli"
+      ],
+      "date": "2022-12-26"
+    }
+  ],
   "Hoshimachi Suisei 2nd Solo Live “Shout in Crisis”": [
     {
       "type": "special",
       "character": "suisei",
       "date": "2023-01-28"
+    }
+  ],
+  "Cinderella switch ～ふたりでうたうホロライブ～": [
+    {
+      "type": "special",
+      "character": [
+        "chloe",
+        "iroha"
+      ],
+      "date": "2023-01-28"
+    },
+    {
+      "type": "special",
+      "character": [
+        "aki",
+        "lui"
+      ],
+      "date": "2023-02-25"
+    },
+    {
+      "type": "special",
+      "character": [
+        "mel",
+        "nene"
+      ],
+      "date": "2023-03-25"
+    },
+    {
+      "type": "special",
+      "character": [
+        "choco",
+        "noel"
+      ],
+      "date": "2023-04-22"
     }
   ],
   "4th fes. Our Bright Parade": [
@@ -229,6 +407,18 @@
         "polka"
       ],
       "date": "2023-07-07"
+    }
+  ],
+  "Protolive#2 〜ヤマトファンタジア〜": [
+    {
+      "type": "special",
+      "character": [
+        "fubuki",
+        "ayame",
+        "mio",
+        "miko"
+      ],
+      "date": "2023-07-15"
     }
   ],
   "ホロライブ・サマー2023 3DLIVE「Splash Party!」": [
